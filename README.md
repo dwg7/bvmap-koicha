@@ -31,6 +31,7 @@ bvmap は、公開当時の帯域とブラウザの制約に合わせてタイ�
 | [docs/bvmap-anatomy.md](docs/bvmap-anatomy.md) | bvmap タイルの中身(層、`vt_flag17`、extent、建築物のズーム) |
 | [DECISIONS.md](DECISIONS.md) | 決めたことと、その理由(追記専用) |
 | [CLAUDE.md](CLAUDE.md) | 作業規則(人とエージェント向け) |
+| [style/bvmap-koicha-starlight.md](style/bvmap-koicha-starlight.md) | bvmap-starlight のズーム値を一段ずらしたスタイル |
 | `chashaku/` | 計測のコード(Python 標準ライブラリのみ)と `results/`(CSV) |
 | `tools/` | 取得・検証用スクリプト(バイナリはコミットしない) |
 

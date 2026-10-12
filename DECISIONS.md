@@ -241,3 +241,37 @@ MapLibre GL JS **6.14.0**(`encoding: "mlt"`)に tokyo の `data/mlt/tokyo/{bvmap
 - 他のクライアント(MapLibre Native、Martin 経由の配信など)は未確認。
 - 描画の性能(複雑な z13 タイルのデコード・描画時間)は測っていない。
 
+---
+
+## D8: bvmap-koicha-starlight は、bvmap-starlight の生成物を機械的に −1 ずらして作る
+
+**Status**: Accepted (2026-10-12)
+
+### 背景
+
+D6 で maxzoom 16(`hyp`)を採用した。タイルの z は bvmap の z+1 の内容を持つので、スタイルのズームの値も一段ずらす必要がある。
+最初のプロンプトでは「dwg7/bvmap の bvmap-starlight のズームの値を一段ずらしたもの」と定められていた。
+
+### 決定
+
+- dwg7/bvmap の `style/bvmap-starlight.json`(`generator/` が `bvmap-dark.json` から生成する成果物)を**入力のスナップショット**として
+  `style/upstream/` に置き(コミット `9068c809`)、`style/make_koicha_starlight.py` でズームの値だけを −1 する。
+  生成の対象はレイヤーの `minzoom`/`maxzoom`、`step` と `interpolate` の停止値。配色などは触らない。
+- dwg7/bvmap の `generator/`(YAML 駆動)には手を入れない。ズームの値の移動はその下流の機械的な変換で足り、
+  配色の磨き上げ(上流の仕事)と、タイルに合わせる調整(こちらの仕事)を分けられる。
+- ソースは MLT(`encoding: "mlt"`)、`minzoom 3`、`maxzoom 16`。`attribution` に「国土地理院最適化ベクトルタイルを加工して作成」を入れる。
+- `["zoom"]` が `step` / `interpolate` 以外の形で現れたら、スクリプトは失敗する。
+
+### 理由
+
+- 上流を再生成するたびに、同じ変換を再実行できる。差分は「−1」だけと言い切れるので、レビューも簡単。
+- 描画の確認(D7)で、ズーム値を −1 しただけの素朴なスタイルで `hyp` のタイルが矛盾なく描けると分かっていた。
+  bvmap-starlight で改めて確かめ、道路縁・軌道・注記まで描けた。
+
+### 保留事項
+
+- z3〜z12 は未作成・未確認(D3: 計測は z13〜z16)。bvmap の z4〜z7 は extent 16384 で、束ねると 32768 になる。
+- 線幅・文字サイズも停止値を −1 したので、同じ表示ズームで線や文字が、上流の一段下の大きさになる。
+  見た目として望ましいかは、実際の閲覧で判断する(hfu さんの確認が要る)。
+- `source.url` の配信先、`glyphs`/`sprite` の扱い(今は上流のまま)。
+
