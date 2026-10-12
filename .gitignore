@@ -2,5 +2,6 @@
 data/
 # downloaded third-party binaries (see tools/README.md for how to fetch + verify)
 tools/mlt-*/
+tools/martin-*/
 __pycache__/
 .DS_Store

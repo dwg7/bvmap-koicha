@@ -449,3 +449,50 @@ hfu さんの指示で、stars への反映と MLT 配信の確認に進んだ�
 - 間引き: タイルの大きさの目標値が決まれば判断できる(D6)。
 - 後回しにした整理(`chashaku/viewer/` の置き場所、`tiles_mvt.csv` の改名、D11)。
 
+---
+
+## D16: タイル圧縮の見積もり — 当面は無圧縮のまま。MLT + gzip/brotli/zstd は Martin が未対応
+
+**Status**: Accepted (2026-10-12) — 圧縮の話は概ね落ち着かせて次へ進む(hfu さん、2026-10-13)
+
+### 訂正
+
+D13 の直前に私が示した「同じタイル 15/29102/12905 で、MLT が 20,541 B、bvmap が gzip で 15,657 B」という比較は、**別の内容のタイル**
+(koicha の z15 は bvmap の z16 の内容)どうしで、公平ではなかった。圧縮が配信サイズの主因だという言い方は誤りで、圧縮の効果は次のとおり約 1 割。
+
+### 見積もり(`chashaku/compress_estimate.py`、5範囲の `hyp` 全 2,753 タイル。結果は `results/compress_*.csv|md`)
+
+| MLT の設定 | 無圧縮 | gzip -9 | brotli -11 | zstd -19 |
+|---|---|---|---|---|
+| default(`mlt` 0.4.3) | 30.07MB(1.000) | 0.909 | 0.888 | 0.904 |
+| `--no-fastpfor` | 1.103 | 0.876 | **0.818** | 0.867 |
+| `--sort auto` | 0.985 | 0.894 | 0.874 | 0.890 |
+| `--no-fsst`、`--no-shared-dict` | default と同じ | 同じ | 同じ | 同じ |
+
+- 比は「default の無圧縮」に対する割合。z13 の最悪タイル(最大): 無圧縮 120.6KB → gzip 104.8KB → brotli 100.0KB(default)。`--no-fastpfor` + brotli で 89.2KB。
+- FSST と共有辞書は、この 5 範囲のタイルでは効いていない(オフにしても同じバイト数)。
+- FastPFOR は、無圧縮では 10% 効く(整数列を詰める)が、そのぶん後段の圧縮の余地が減る。**圧縮が掛かる配信なら `--no-fastpfor` のほうが約 8% 小さい**(brotli で 0.818 対 0.888)。
+- 並べ替え(`--sort auto`)は約 1.5% で、描画順を変えうるので採らない(D4)。
+
+### 配信側の事実(Martin 1.14.0 = stars 本番と同じ版を、公式リリースの macOS arm64 版で手元に取得・sha256 照合して確認)
+
+- **`Format Mlt and compression Gzip/Brotli/Zstd are not yet supported`**。MLT の PMTiles は**タイル圧縮「なし」でしか読み込めず**、
+  それ以外のファイルがあると、そのディレクトリの読み込みが警告で止まる(1.8.2 も同じ)。
+  → **stars の `/home/stars/data` に、圧縮した MLT の PMTiles を置いてはいけない**(Martin の起動に失敗しうる)。
+- 無圧縮のタイルは、`Accept-Encoding` に何を指定しても `Content-Encoding` なしで返る。stars 経由(Cloudflare)でも同じで、
+  Cloudflare は `application/vnd.maplibre-tile` を既定では圧縮しない。
+- `pmtiles.js` の既定の復号は none と gzip のみ(brotli/zstd は「未対応」エラー)。ただし stars では Martin 経由なので、直接は関係しない。
+
+### 決定
+
+- **当面は無圧縮のまま配信し、MLT の設定は default(FastPFOR あり)を使う。** 無圧縮が前提なら、default が最小(30.07MB 対 33.18MB)。
+- 圧縮を効かせるなら、**配信経路での圧縮**になる。選択肢(いずれも未実施):
+  1. Cloudflare の圧縮ルールで `application/vnd.maplibre-tile` を brotli/gzip にする(hfu さんの Cloudflare 設定。効果は約 1 割、`--no-fastpfor` を併用すると約 2 割弱)。
+  2. Martin の上流で、MLT + タイル圧縮への対応を待つ・働きかける(上流の issue は探したが、見つけられなかった)。
+  どちらを採るか、`--no-fastpfor` に切り替えるかは、配信経路が決まってから決める。
+- `build/pack_compressed.py`(タイルを圧縮して PMTiles に詰め直す。ヘッダーのバイトを書き換える)は、将来の検証用に残す。**stars には載せない。**
+
+### 保留事項
+
+- `--no-fastpfor` のクライアント側の復号時間は測っていない(MapLibre GL JS の MLT デコーダーでは、どちらも標準のはず)。
+
