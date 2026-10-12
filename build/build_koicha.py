@@ -81,5 +81,12 @@ meta = {"name": f"bvmap-koicha-{area}", "format": "pbf", "type": "overlay", "ver
         "json": json.dumps({"vector_layers": [{"id": n, "fields": {k: "String" for k in sorted(ks)}} for n, ks in sorted(layers.items())]})}
 db.executemany("INSERT INTO metadata VALUES (?,?)", meta.items())
 db.commit()
+# Clean PMTiles metadata for build.sh (`pmtiles edit --metadata`): mlt convert writes TileJSON keys (tiles, bounds, ...) into the
+# metadata, which Martin 1.8.2 flattens a second time (duplicate "tiles":[] key). vector_layers come from the bvmap original
+# so every layer the style references is declared (a regional extract may hold no tile with e.g. Isbt).
+orig = pr.read_metadata(os.path.join(D, "bvmap", f"{area}.pmtiles"))
+clean = {"name": meta["name"], "description": meta["description"], "attribution": meta["attribution"], "version": "1",
+         "vector_layers": [dict(l, minzoom=max(l.get("minzoom", 4) - 1, 3), maxzoom=16) for l in orig["vector_layers"]]}
+json.dump(clean, open(os.path.join(D, "koicha", f"bvmap-koicha-{area}.metadata.json"), "w"), ensure_ascii=False, indent=1)
 print("koicha tiles:", len(out), {z: sum(1 for k in out if k[0] == z) for z in range(3, 17)})
 print("wrote", path)

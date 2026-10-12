@@ -350,3 +350,39 @@ D6 で maxzoom 16(`hyp`)を採用した。タイルの z は bvmap の z+1 の�
 
 - `chashaku/viewer/` の置き場所(`build/viewer/` へ移すか)と、`results/tiles_mvt.csv` の改名は、後回し(hfu さんの判断、2026-10-12)。
 
+---
+
+## D12: Martin での MLT 配信 — ローカルの Martin 1.8.2 で確認。本番(stars)は未反映
+
+**Status**: Accepted (2026-10-12)
+
+### 経緯
+
+hfu さんの指示で、stars への反映と MLT 配信の確認に進んだ。stars の運用規則(`hfu/stars` の CLAUDE.md)は、本番への変更の前に計画を示すことを求める。
+本番の確認は、`ssh spacex.optgeo.org` が **Cloudflare Access のブラウザ認証**を要求し、こちらでは認証を代行できないため、**本番には接続できなかった**
+(接続は事前確認の1回のみで、何も変更していない)。そこで、先にローカルの Martin で確認した。
+
+### ローカルでの確認(Martin 1.8.2 = `~/.cargo/bin/martin`。本番は 1.14.0)
+
+- `martin <dir>` に `bvmap-koicha-tokyo.pmtiles` を置くだけで認識される。`/catalog` の `content_type` は **`application/vnd.maplibre-tile`**(MLT として認識)。
+- タイル(`/bvmap-koicha-tokyo/{z}/{x}/{y}`)は、`mlt convert` の出力と**バイト単位で一致**(`Content-Encoding` なし。タイル圧縮が「なし」のため)。
+- TileJSON 経由(`"url": "http://127.0.0.1:3010/bvmap-koicha-tokyo"`)で、bvmap-koicha-starlight が z4, 9, 13, 15, 16 を描画した。エラーなし。
+
+### 見つけた不具合と直し方
+
+1. **`mlt convert` が PMTiles のメタデータに `tiles: []`・`bounds`・`tilejson` などを書き込み、Martin 1.8.2 が TileJSON にもう一度展開するため、キーが重複**
+   (`"tiles":[url]` のあとに `"tiles":[]`)。後勝ちで `tiles` が空になり、MapLibre は何も読まなかった。
+   → `build/build.sh` が `pmtiles edit --metadata` で、メタデータを `name / description / attribution / version / vector_layers` だけに整理する。
+   (ヘッダーの tile type 6 とタイル圧縮は変わらない。1.14.0 で同じ重複が起きるかは未確認だが、整理しておけば起きない。)
+2. **`vector_layers` が、実際にタイルに入っている層だけだった**。スタイルは tokyo のタイルにない `Isbt`(等深線)も参照するので、MapLibre が警告を出す。
+   → 元の bvmap のメタデータの `vector_layers`(24 層)を使い、`minzoom` を −1、`maxzoom` を 16 にする。
+
+### 本番(stars)への反映手順(未実施、hfu さんの確認と認証が要る)
+
+1. `bvmap-koicha-tokyo.pmtiles`(5.7MB)を `/home/stars/data/` へ転送する(新規ファイル。上書きや restart は不要。Martin のファイル監視で自動発見される)。
+   転送前に `df -h /home/stars/data` で空きを確認する。
+2. `https://stars.optgeo.org/bvmap-koicha-tokyo` と `/catalog` を、キャッシュを避ける `?cb=$(date +%s)` で確認する(Cloudflare のエッジに最大4時間キャッシュされる)。
+   `content_type` が MLT か、`tiles` が1つか。
+3. スタイル: `make_koicha_starlight.py --source-url https://stars.optgeo.org/bvmap-koicha-tokyo` で生成し、`hfu/stars/styles/` へ PR する
+   (新しいスタイルファイルは Martin の restart が要る。その restart は別途確認する)。
+

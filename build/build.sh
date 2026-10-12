@@ -21,4 +21,5 @@ fi
 python3 -I build/build_koicha.py "$area"                     # -> data/koicha/bvmap-koicha-<area>.mvt.mbtiles
 rm -f "data/koicha/bvmap-koicha-$area.pmtiles"
 tools/mlt-0.4.3/mlt convert --verify "data/koicha/bvmap-koicha-$area.mvt.mbtiles" "data/koicha/bvmap-koicha-$area.pmtiles"
+pmtiles edit "data/koicha/bvmap-koicha-$area.pmtiles" --metadata="data/koicha/bvmap-koicha-$area.metadata.json"
 ls -la "data/koicha/bvmap-koicha-$area.pmtiles"
