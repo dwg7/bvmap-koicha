@@ -216,3 +216,28 @@ tokyo(約 9.8GB)と osaka(約 0.5GB)の途中で気づいて停止した。GSI �
 
 - 採用は maxzoom 16 の組み方(`hyp`)のみ。間引きの要否は、タイルの大きさの目標値が決まるまで保留のまま。
 - 描画の確認(MapLibre GL JS での extent 8192 の MLT、z16 の層構成)は未実施で、次の段階の前提として残る。
+
+---
+
+## D7: 描画の確認 — `hyp` の MLT は MapLibre GL JS で正しく描ける
+
+**Status**: Accepted (2026-10-12)
+
+### 決定・結果
+
+D6 の前提として残っていた描画の確認を行った(`chashaku/viewer/`)。ブラウザ(Claude のビルトインブラウザ)で
+MapLibre GL JS **6.14.0**(`encoding: "mlt"`)に tokyo の `data/mlt/tokyo/{bvmap,hyp}` を読ませ、左右を連動させて比べた。
+
+- **extent 8192 の MLT(z13〜z15)は問題なく復号・描画できた。** 継ぎ目(束ねた4枚の境界)も目視で見えない。
+- **z14 表示は bvmap z15 の内容**、**z15 表示は bvmap z16 の内容**、**z16 表示は bvmap z17 の内容**(道路縁・線路の軌道など)で描かれた。
+  GSI の `std.json` の `step ["zoom"]` と `minzoom: 17` を、ズーム値だけ −1 した(`bvmap-koicha-starlight` の素朴な代用)もので足りた。
+  `hyp` の z15 が `vt_flag17=2` を、z16 が `vt_flag17=0` を捨てていても、スタイルのフィルターと矛盾しない。
+- 使った版: maplibre-gl 6.14.0(同梱の `@maplibre/mlt` ^1.3.0 がデコーダー)、pmtiles 4.5.0(今回は未使用)。
+  パッケージはユーザーの許可を得て `npm install --ignore-scripts`(固定版)で取得した。
+
+### 限界
+
+- 確認は tokyo の中心(東京駅周辺)で z14〜z16 を目視。注記(symbol 層)は描いていない(グリフ・スプライトを GSI から取らないため)。
+- 他のクライアント(MapLibre Native、Martin 経由の配信など)は未確認。
+- 描画の性能(複雑な z13 タイルのデコード・描画時間)は測っていない。
+

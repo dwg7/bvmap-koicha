@@ -1,0 +1,1 @@
+{"name":"chashaku-viewer","private":true,"version":"0.0.0","description":"Rendering check for bvmap-koicha hyp tiles (MLT)","dependencies":{"maplibre-gl":"6.14.0","pmtiles":"4.5.0"}}
