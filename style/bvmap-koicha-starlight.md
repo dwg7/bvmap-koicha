@@ -33,8 +33,7 @@ node style/validate.mjs style/bvmap-koicha-starlight.json   # 要: npm ci --pref
 
 ## まだ確かめていないこと
 
-- **z3〜z12 の見た目。** タイルは z13〜z16 しか作っていない(計測の範囲)。z ≤ 14 は bvmap の z+1 を束ねる設計だが、
-  z4〜z7 の bvmap は extent 16384 なので、束ねると 32768 になる。MLT で扱えるかは未確認。
+- **z3〜z12 の見た目は tokyo 限定版で確認済み**(D9。z4〜z7 は extent 32768 で、MLT として復号・描画できた)。全国の見た目は未確認。
 - 上流との画素単位の一致(縮尺が違うので比べられない)。注記の重なり・配置の質は目視のみ。
 - `source.url`(配信先)は未定。`glyphs` と `sprite` は上流のまま `stars.optgeo.org` を指す(hfu/stars の配信)。
 - 上流が更新されたら、スナップショットを差し替えて再生成する(`style/upstream/README.md`)。

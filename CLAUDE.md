@@ -13,7 +13,7 @@ dwg7(UN Smart Maps Group)の活動で、**国土地理院の公式な製品で�
 ## 段階と、今やらないこと
 
 1. **計測(chashaku)** 済み(D6: maxzoom 16、D7: 描画確認)。作る前に測る。
-2. **スタイル bvmap-koicha-starlight** 作成済み(D8)。← 今ここ。次は bvmap-koicha の PMTiles(まず狭い範囲)。
+2. **スタイル bvmap-koicha-starlight**(D8)と、**tokyo の範囲限定 PMTiles**(D9、`build/build.sh tokyo`)作成済み。← 今ここ。次は配信先の決定と、タイル圧縮、全国版の相談。
 
 計測の結果を見る前にやらない: 全国のタイルセットの生成、スタイルの作成、地物の簡略化・総描。
 dwg7/evergreen の言葉では、これは Cartographer ではなく Library 側のタイルセットである。
@@ -49,6 +49,7 @@ dwg7/evergreen の言葉では、これは Cartographer ではなく Library 側
 - `chashaku/areas.tsv` — 測る場所(名前、経度緯度の範囲)
 - `chashaku/results/` — CSV と Markdown の集計。`data/`(抽出、変種タイル、MLT 出力)は git の管理外で、再生成できる
 - `tools/` — `mlt` の取得・検証(バイナリはコミットしない)
+- `build/` — 範囲限定の bvmap-koicha PMTiles のビルド(`build.sh`、`build_koicha.py`)
 - `style/` — bvmap-koicha-starlight(`make_koicha_starlight.py` の生成物。手で編集しない)と、上流のスナップショット `upstream/`
 - `chashaku/viewer/` — 描画確認(`index.html`: 素のスタイル、`starlight.html`: starlight)
 

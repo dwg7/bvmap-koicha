@@ -275,3 +275,32 @@ D6 で maxzoom 16(`hyp`)を採用した。タイルの z は bvmap の z+1 の�
   見た目として望ましいかは、実際の閲覧で判断する(hfu さんの確認が要る)。
 - `source.url` の配信先、`glyphs`/`sprite` の扱い(今は上流のまま)。
 
+---
+
+## D9: 最初の bvmap-koicha PMTiles は tokyo の範囲限定版(z3〜z16、MLT)
+
+**Status**: Accepted (2026-10-12)
+
+### 決定
+
+- `build/build.sh tokyo` で、`data/koicha/tokyo.pmtiles` を作る(git の管理外)。計 **267 タイル**(z3: 1 … z13: 6, z14: 16, z15: 49, z16: 182)、
+  **5.7MB**(MLT、タイルは無圧縮。各タイルを gzip -9 すると 5.2MB)。組み方は `hyp`(D3/D6)で、z3〜z14 は bvmap の z+1 を束ねる。
+- 範囲は計測と同じ tokyo。z4〜z13 は追加で 19 タイルを取得した(ドライランで枚数を確認、約 0.57MB)。
+- 変換は `mlt convert --verify`(0.4.3、D4)。PMTiles のヘッダーは tile type = 6(MLT)、タイル圧縮 = なし。
+- 範囲限定版: 束ねる子が取得範囲の外にあるタイルは、あるぶんだけで束ねる。低ズームでは bvmap の1タイルが範囲より大きいので、
+  z3〜z12 は bvmap タイルの縁で欠ける(`build/README.md`)。全国版には出ない。
+
+### 確認したこと
+
+- ブラウザ(MapLibre GL JS 6.14.0 + pmtiles 4.5.0、`pmtiles://` プロトコル、HTTP Range)で bvmap-koicha-starlight と組み合わせ、
+  z3, 5, 7, 9, 11, 12, 13, 14, 15, 16 を表示した。エラーなし、注記・アイコン・出典表示も出た。
+- **z4〜z7 を束ねた extent 32768 の MLT も復号・描画できた**(D8 の保留事項が解消)。
+- タイルの大きさ: 最大は z13 の 120.6KB(MLT)/104.8KB(MLT+gz)で、計測(`chashaku/REPORT.md`)と一致。z3〜z12 は最大 76KB(z10、MLT)。
+
+### 保留事項
+
+- **タイル圧縮が「なし」**。`mlt convert` が PMTiles に直接書くため。配信では、MLT+gzip(約 9% 小さい)にしたい。
+  タイルごとに gzip して PMTiles に詰め直す方法(mbtiles 経由など)を、配信先が決まるときに決める。
+- 配信先(`source.url`)、PMTiles の `vector_layers` メタデータ(今は mbtiles 経由の簡易版)。
+- 全国版は未生成(D2: 計測の結果を見てから。取得量は元の約17GB、`pmtiles extract` を使わず丸ごと取るか要相談)。
+
