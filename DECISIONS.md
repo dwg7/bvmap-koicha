@@ -283,7 +283,7 @@ D6 で maxzoom 16(`hyp`)を採用した。タイルの z は bvmap の z+1 の�
 
 ### 決定
 
-- `build/build.sh tokyo` で、`data/koicha/tokyo.pmtiles` を作る(git の管理外)。計 **267 タイル**(z3: 1 … z13: 6, z14: 16, z15: 49, z16: 182)、
+- `build/build.sh tokyo` で、`data/koicha/tokyo.pmtiles` を作る(git の管理外。→ D11 で `bvmap-koicha-tokyo.pmtiles` に改名)。計 **267 タイル**(z3: 1 … z13: 6, z14: 16, z15: 49, z16: 182)、
   **5.7MB**(MLT、タイルは無圧縮。各タイルを gzip -9 すると 5.2MB)。組み方は `hyp`(D3/D6)で、z3〜z14 は bvmap の z+1 を束ねる。
 - 範囲は計測と同じ tokyo。z4〜z13 は追加で 19 タイルを取得した(ドライランで枚数を確認、約 0.57MB)。
 - 変換は `mlt convert --verify`(0.4.3、D4)。PMTiles のヘッダーは tile type = 6(MLT)、タイル圧縮 = なし。
@@ -326,4 +326,27 @@ D6 で maxzoom 16(`hyp`)を採用した。タイルの z は bvmap の z+1 の�
 - タイル圧縮(D9 の保留事項)。Martin は gzip の PMTiles を、そのまま `Content-Encoding: gzip` で返せる。MLT のタイルを gzip 済みにしたほうがよい。
 - `sprite` と `glyphs` は、すでに stars が配信している(`/sprite/bvmap-starlight`、`/font/...`)ので、スタイルは今のまま使える。
 - stars の `styles/` には `bvmap-starlight.json` が既にある。`bvmap-koicha-starlight.json` を並べて置く形になる。
+
+---
+
+## D11: 公開名 — PMTiles は `bvmap-koicha-<範囲>.pmtiles`、スタイルは `bvmap-koicha-starlight`
+
+**Status**: Accepted (2026-10-12) — hfu さんがレビューして承認
+
+### 決定
+
+- 範囲限定版の PMTiles は **`bvmap-koicha-tokyo.pmtiles`**(`build/build.sh tokyo` の出力。中間の mbtiles も `bvmap-koicha-tokyo.mvt.mbtiles`)。
+  PMTiles 内のメタデータの `name` も `bvmap-koicha-tokyo`(stars の `/catalog` はファイルのメタデータから名前を出す)。
+- 将来の全国版は **`bvmap-koicha.pmtiles`**(source ID `bvmap-koicha`)。範囲限定版と全国版で ID を分け、全国版ができたら、
+  スタイルの URL を差し替えるだけで済むようにする。
+- スタイルは **`bvmap-koicha-starlight.json`**(stars では `/style/bvmap-koicha-starlight`)。
+- stars の既存名(`bvmap`、`bvmap-starlight`)とは衝突しない。
+
+### 理由
+
+- stars では PMTiles のファイル名がそのまま source ID になる(D10)。`tokyo` のような汎用名は、他のデータと紛れる。
+
+### 保留事項
+
+- `chashaku/viewer/` の置き場所(`build/viewer/` へ移すか)と、`results/tiles_mvt.csv` の改名は、後回し(hfu さんの判断、2026-10-12)。
 

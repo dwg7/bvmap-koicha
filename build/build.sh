@@ -18,7 +18,7 @@ if [ ! -f "$low" ]; then                                     # z4-13 of this are
   pmtiles extract "$SRC" "$low" --bbox="$bbox" --minzoom=4 --maxzoom=13 --download-threads=2 >/dev/null 2>&1
   date -u +%FT%TZ > "data/bvmap/$area-z4-13.FETCHED_AT.txt"
 fi
-python3 -I build/build_koicha.py "$area"                     # -> data/koicha/<area>.mvt.mbtiles
-rm -f "data/koicha/$area.pmtiles"
-tools/mlt-0.4.3/mlt convert --verify "data/koicha/$area.mvt.mbtiles" "data/koicha/$area.pmtiles"
-ls -la "data/koicha/$area.pmtiles"
+python3 -I build/build_koicha.py "$area"                     # -> data/koicha/bvmap-koicha-<area>.mvt.mbtiles
+rm -f "data/koicha/bvmap-koicha-$area.pmtiles"
+tools/mlt-0.4.3/mlt convert --verify "data/koicha/bvmap-koicha-$area.mvt.mbtiles" "data/koicha/bvmap-koicha-$area.pmtiles"
+ls -la "data/koicha/bvmap-koicha-$area.pmtiles"

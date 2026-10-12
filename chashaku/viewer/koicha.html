@@ -8,7 +8,7 @@
 <script type="module">
 import * as maplibregl from "./node_modules/maplibre-gl/dist/maplibre-gl.mjs";
 // The real thing: bvmap-koicha-starlight reading a bvmap-koicha PMTiles (MLT) over HTTP Range.
-// ?style=<url of a style json>  (default: data/koicha/style-local.json made by make_koicha_starlight.py --source-url pmtiles://http://127.0.0.1:8765/data/koicha/tokyo.pmtiles)
+// ?style=<url of a style json>  (default: data/koicha/style-local.json made by make_koicha_starlight.py --source-url pmtiles://http://127.0.0.1:8765/data/koicha/bvmap-koicha-tokyo.pmtiles)
 const proto = new pmtiles.Protocol();
 maplibregl.addProtocol('pmtiles', proto.tile);
 const q = new URLSearchParams(location.search);

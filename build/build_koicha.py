@@ -7,7 +7,7 @@
 Only bundling and dropping; features are never edited. Tiles whose bvmap children lie outside the extracted area are
 partial (bundled from the children that exist), so the result is regional (see build/README.md).
 Input : data/bvmap/<area>.pmtiles (z13-16) + data/bvmap/<area>-z4-13.pmtiles (z4-13), both from `pmtiles extract`
-Output: data/koicha/<area>.mvt.mbtiles  (then `mlt convert` -> PMTiles, see build/build.sh)
+Output: data/koicha/bvmap-koicha-<area>.mvt.mbtiles  (then `mlt convert` -> PMTiles, see build/build.sh)
 """
 import gzip
 import json
@@ -62,7 +62,7 @@ for (z, x, y), t in sorted(src.items()):
         out[(16, x, y)] = mvt.filter_layers(t, (), drop0)
 
 os.makedirs(os.path.join(D, "koicha"), exist_ok=True)
-path = os.path.join(D, "koicha", f"{area}.mvt.mbtiles")
+path = os.path.join(D, "koicha", f"bvmap-koicha-{area}.mvt.mbtiles")
 if os.path.exists(path):
     os.remove(path)
 db = sqlite3.connect(path)
@@ -73,7 +73,7 @@ for (z, x, y), L in out.items():
     db.execute("INSERT INTO tiles VALUES (?,?,?,?)", (z, x, (1 << z) - 1 - y, gzip.compress(mvt.encode_tile(L), 9)))
     for l in L:
         layers.setdefault(l.name, set()).update(l.keys)
-meta = {"name": f"bvmap-koicha ({area})", "format": "pbf", "type": "overlay", "version": "1",
+meta = {"name": f"bvmap-koicha-{area}", "format": "pbf", "type": "overlay", "version": "1",
         "minzoom": "3", "maxzoom": "16", "bounds": ",".join(map(str, bbox)),
         "center": f"{(bbox[0]+bbox[2])/2},{(bbox[1]+bbox[3])/2},14",
         "description": "bvmap-koicha regional tile set (hyp arrangement). Not an official GSI product.",
