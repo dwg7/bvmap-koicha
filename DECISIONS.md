@@ -386,3 +386,30 @@ hfu さんの指示で、stars への反映と MLT 配信の確認に進んだ�
 3. スタイル: `make_koicha_starlight.py --source-url https://stars.optgeo.org/bvmap-koicha-tokyo` で生成し、`hfu/stars/styles/` へ PR する
    (新しいスタイルファイルは Martin の restart が要る。その restart は別途確認する)。
 
+---
+
+## D13: bvmap-koicha-tokyo.pmtiles を stars に載せ、MLT 配信を確認した
+
+**Status**: Accepted (2026-10-12) — hfu さんの指示(「B」: 認証後に実行)
+
+### 実施したこと(本番への変更はこの1点のみ)
+
+- hfu さんが Cloudflare Access の認証を済ませたあと、`ssh spacex.optgeo.org` で事前確認(空き 1.3T、Martin 1.14.0 稼働、同名ファイルなし)。
+- `bvmap-koicha-tokyo.pmtiles`(5,704,019 B)を `/home/stars/data/` へ、拡張子の違う仮名(`.partial`)で転送し、**sha256 を照合**(`2306825581e86089…ade4`)してから `mv` で公開した
+  (途中のファイルを Martin のファイル監視に拾わせないため)。**新規ファイルのみ。上書き・Martin の再起動・設定変更はしていない。**
+
+### 確認したこと(`?cb=` でキャッシュを避け、`cf-cache-status: MISS`)
+
+- `https://stars.optgeo.org/catalog` に `bvmap-koicha-tokyo` が現れた。`content_type` は **`application/vnd.maplibre-tile`**。
+- TileJSON(`/bvmap-koicha-tokyo`)は `tiles` が1つ、`minzoom 3`、`maxzoom 16`、`bounds` が tokyo、`vector_layers` が 24 層。
+  **重複キーの問題(D12)は、本番の Martin 1.14.0 では起きていない**(整理したメタデータのため。整理前の挙動は未確認)。
+- タイル(15/29102/12905)は、ローカルの `mlt convert` 出力と**バイト単位で一致**。
+- `make_koicha_starlight.py --source-url https://stars.optgeo.org/bvmap-koicha-tokyo` のスタイルを MapLibre GL JS 6.14.0 で読み、
+  z5, 10, 14, 15, 16 を描画した。エラーなし。`glyphs`/`sprite`(stars 配信)も含めた注記・アイコンも出た。
+
+### まだ
+
+- スタイル `bvmap-koicha-starlight.json` は、まだ stars の `styles/` に載っていない(`hfu/stars` への PR と、新規スタイルファイルのための Martin の restart が要る。どちらも確認のうえ)。
+  今は、ローカルで生成したスタイルの `source.url` を本番の TileJSON に向けて確認した段階。
+- タイル圧縮は「なし」のまま(約 9% の余地、D9)。Cloudflare 経由の転送では、圧縮の扱いを別途確認する。
+
