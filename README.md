@@ -4,7 +4,7 @@
 > This is an activity of dwg7 (UN Smart Maps Group). It is not an official product or service of the Geospatial Information Authority of Japan (GSI).
 
 国土地理院の最適化ベクトルタイル(bvmap)を素材にして、**建築物がたっぷり入った、濃い地図**のためのタイルセット(PMTiles)を作るプロジェクトです。
-現在は最初の段階、**作る前に測る**(chashaku)にいます。タイルセットはまだありません。
+計測(chashaku)を終え、東京の範囲限定版を stars で公開しています(スタイル `https://stars.optgeo.org/style/bvmap-koicha-starlight`、タイル `https://stars.optgeo.org/bvmap-koicha-tokyo`。D15)。全国版はこれからです。
 
 *koicha — thick tea. The same matcha as usucha (thin tea), made with less water.*
 *bvmap-koicha takes the same GSI data as bvmap and brews it thicker: more buildings per tile, the same ingredients.*

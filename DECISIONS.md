@@ -426,3 +426,26 @@ hfu さんの指示で、stars への反映と MLT 配信の確認に進んだ�
 - **新規スタイルファイルなので、デプロイには Martin の restart が要る**(`hfu/stars` の CONTRIBUTING)。restart は stars 側の手順と、hfu さんの確認で行う。こちらからは行わない。
 - PR の作成者とレビュー・マージの役割は分ける(CONTRIBUTING の先例どおり)。マージ後の stars 側の反映は、gatekeeper が行う。
 
+---
+
+## D15: bvmap-koicha-starlight と bvmap-koicha-tokyo が stars で公開された
+
+**Status**: Accepted (2026-10-12)
+
+- hfu さんが hfu/stars#14 をマージし(2026-10-12 12:03Z)、配置と Martin の再起動を行った。こちらからは何も変更していない。
+- 再起動後に確認した(`?cb=` でキャッシュを避け、`cf-cache-status: MISS`):
+  - `https://stars.optgeo.org/style/bvmap-koicha-starlight` が **200**。123 層、ソースは `https://stars.optgeo.org/bvmap-koicha-tokyo`(`encoding: "mlt"`)、
+    `glyphs`/`sprite` は stars の既存 URL。**配信されたスタイルは、こちらで生成した JSON と完全に一致**。
+  - `/catalog` の `styles` に `bvmap-koicha-starlight`、`tiles` に `bvmap-koicha-tokyo`。
+  - 公開 URL のスタイルだけを MapLibre GL JS 6.14.0 に渡して、z5, 10, 14, 15, 16 を描画した(エラーなし、注記・アイコンも出る)。
+- 公開 URL(いずれも範囲限定版 = 東京 139.73–139.80, 35.65–35.71):
+  - スタイル: `https://stars.optgeo.org/style/bvmap-koicha-starlight`
+  - タイル(TileJSON): `https://stars.optgeo.org/bvmap-koicha-tokyo`
+
+### 次の課題(未着手)
+
+- タイル圧縮(今は「なし」、約 9% の余地、D9)。
+- 全国版 `bvmap-koicha`(D2/D11): 元データの取得量が約 17GB で、取得方法と量を hfu さんと相談してから。
+- 間引き: タイルの大きさの目標値が決まれば判断できる(D6)。
+- 後回しにした整理(`chashaku/viewer/` の置き場所、`tiles_mvt.csv` の改名、D11)。
+
