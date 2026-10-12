@@ -1,0 +1,6 @@
+# bvmap extracts, generated variants and MLT outputs are reproducible from chashaku/ (see chashaku/run_all.sh)
+data/
+# downloaded third-party binaries (see tools/README.md for how to fetch + verify)
+tools/mlt-*/
+__pycache__/
+.DS_Store
