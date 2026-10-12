@@ -304,3 +304,26 @@ D6 で maxzoom 16(`hyp`)を採用した。タイルの z は bvmap の z+1 の�
 - 配信先(`source.url`)、PMTiles の `vector_layers` メタデータ(今は mbtiles 経由の簡易版)。
 - 全国版は未生成(D2: 計測の結果を見てから。取得量は元の約17GB、`pmtiles extract` を使わず丸ごと取るか要相談)。
 
+---
+
+## D10: 配信は stars(hfu/stars)で行う。開発中はローカルで動かす
+
+**Status**: Accepted (2026-10-12) — hfu さんの指示
+
+### 決定
+
+- **本番の配信は stars(stars.optgeo.org、Martin)。** このリポジトリは配信設定を持たない(dwg7/bvmap と同じ役割分担)。
+  配信物は `hfu/stars` に置く: PMTiles は `/home/stars/data/` に置くと、`config/martin.yaml` の `pmtiles.paths` の自動発見で
+  ファイル名が source ID になって配信される(`docs/KNOWN_FACTS.md`)。スタイルは `hfu/stars/styles/` に PR する。
+- **開発中はローカル**(`chashaku/viewer/serve.py` と `build/`)で動かしてよい。stars には載せない。
+- stars への反映(PMTiles のアップロード、スタイル PR、`martin.yaml` の変更)は、いずれも対外的な変更なので、**そのつど hfu さんの確認を得てから**行う。
+
+### stars 側で確認が要ること(未確認、stars を読んだだけ)
+
+- stars の Martin が、tile type 6(MLT)の PMTiles を正しく配信するか(Content-Type、`encoding` の伝え方)。
+  stars のスタイルが `pmtiles://` を直接読むか、Martin の TileJSON(`"url": "https://stars.optgeo.org/<id>"`、bvmap-starlight と同じ形)を読むかで、
+  `make_koicha_starlight.py --source-url` の値と、`encoding: "mlt"` の置き場所が変わる。
+- タイル圧縮(D9 の保留事項)。Martin は gzip の PMTiles を、そのまま `Content-Encoding: gzip` で返せる。MLT のタイルを gzip 済みにしたほうがよい。
+- `sprite` と `glyphs` は、すでに stars が配信している(`/sprite/bvmap-starlight`、`/font/...`)ので、スタイルは今のまま使える。
+- stars の `styles/` には `bvmap-starlight.json` が既にある。`bvmap-koicha-starlight.json` を並べて置く形になる。
+
