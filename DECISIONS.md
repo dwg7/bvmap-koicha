@@ -413,3 +413,16 @@ hfu さんの指示で、stars への反映と MLT 配信の確認に進んだ�
   今は、ローカルで生成したスタイルの `source.url` を本番の TileJSON に向けて確認した段階。
 - タイル圧縮は「なし」のまま(約 9% の余地、D9)。Cloudflare 経由の転送では、圧縮の扱いを別途確認する。
 
+---
+
+## D14: スタイルは hfu/stars へ PR(hfu/stars#14)。マージ・デプロイは stars の gatekeeper の手順に従う
+
+**Status**: Accepted (2026-10-12) — hfu さんの指示
+
+- [hfu/stars#14](https://github.com/hfu/stars/pull/14): `styles/bvmap-koicha-starlight.json` を**1ファイルだけ新規追加**(`config/martin.yaml` は変更しない)。
+  ソースは `https://stars.optgeo.org/bvmap-koicha-tokyo`(範囲限定版。全国版 `bvmap-koicha` ができたら差し替える)。
+- 生成: `make_koicha_starlight.py --source-url https://stars.optgeo.org/bvmap-koicha-tokyo`。stars の `bvmap-starlight.json` と、
+  変換の入力(dwg7/bvmap `9068c809`)のレイヤー・ソースが同一であることを確認してから出した。
+- **新規スタイルファイルなので、デプロイには Martin の restart が要る**(`hfu/stars` の CONTRIBUTING)。restart は stars 側の手順と、hfu さんの確認で行う。こちらからは行わない。
+- PR の作成者とレビュー・マージの役割は分ける(CONTRIBUTING の先例どおり)。マージ後の stars 側の反映は、gatekeeper が行う。
+
