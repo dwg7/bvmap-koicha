@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><title>bvmap-koicha PMTiles check</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="node_modules/maplibre-gl/dist/maplibre-gl.css">
+<style>html,body,#m{margin:0;height:100%}#z{position:absolute;z-index:2;top:8px;left:8px;background:#fffd;padding:4px 8px;border-radius:4px;font:13px system-ui}</style></head><body>
+<div id="m"></div><div id="z"></div>
+<script src="node_modules/pmtiles/dist/pmtiles.js"></script>
+<script type="module">
+import * as maplibregl from "./node_modules/maplibre-gl/dist/maplibre-gl.mjs";
+// The real thing: bvmap-koicha-starlight reading a bvmap-koicha PMTiles (MLT) over HTTP Range.
+// ?style=<url of a style json>  (default: data/koicha/style-local.json made by make_koicha_starlight.py --source-url pmtiles://http://127.0.0.1:8765/data/koicha/bvmap-koicha-tokyo.pmtiles)
+const proto = new pmtiles.Protocol();
+maplibregl.addProtocol('pmtiles', proto.tile);
+const q = new URLSearchParams(location.search);
+const style = await fetch(q.get('style') || '/data/koicha/style-local.json').then(r => r.json());
+const c = (q.get('c') || '139.7671,35.6812').split(',').map(Number);
+const m = new maplibregl.Map({ container: 'm', style, center: c, zoom: +(q.get('z') || 14), minZoom: 2, maxZoom: 18 });
+window.M = m; window.__errs = [];
+m.on('error', e => window.__errs.push(String(e.error && e.error.message || e.error)));
+m.on('move', () => document.getElementById('z').textContent = `bvmap-koicha-starlight z${m.getZoom().toFixed(2)}`);
+</script></body></html>

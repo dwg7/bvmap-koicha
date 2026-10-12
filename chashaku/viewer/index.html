@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><title>chashaku viewer</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="node_modules/maplibre-gl/dist/maplibre-gl.css">
+<style>
+ html,body{margin:0;height:100%;font:13px system-ui} #wrap{display:flex;height:100%}
+ .pane{flex:1;position:relative} .map{position:absolute;inset:0}
+ .label{position:absolute;z-index:2;top:8px;left:8px;background:#fffd;padding:4px 8px;border-radius:4px}
+</style></head><body>
+<div id="wrap">
+ <div class="pane"><div id="l" class="map"></div><div class="label" id="ll"></div></div>
+ <div class="pane"><div id="r" class="map"></div><div class="label" id="rl"></div></div>
+</div>
+<script type="module">
+import * as maplibregl from "./node_modules/maplibre-gl/dist/maplibre-gl.mjs";
+// Left: bvmap (MLT-converted, unmodified content) at zoom z+1.  Right: koicha `hyp` tiles at zoom z.
+// The std.json style is GSI's; for the right map every zoom threshold is shifted by -1 (a stand-in for bvmap-koicha-starlight).
+const BOUNDS = [139.73, 35.65, 139.80, 35.71];
+const shift = (o) => {
+  if (Array.isArray(o)) {
+    const isStep = o[0] === 'step' && Array.isArray(o[1]) && o[1][0] === 'zoom';
+    const isInterp = typeof o[0] === 'string' && o[0].startsWith('interpolate') && Array.isArray(o[2]) && o[2][0] === 'zoom';
+    const out = o.map(shift);
+    if (isStep) for (let i = 3; i < o.length; i += 2) out[i] = o[i] - 1;
+    if (isInterp) for (let i = 3; i < o.length; i += 2) out[i] = o[i] - 1;
+    return out;
+  }
+  if (o && typeof o === 'object') return Object.fromEntries(Object.entries(o).map(([k, v]) => [k, shift(v)]));
+  return o;
+};
+const mk = (base, variant, doShift) => {
+  const s = structuredClone(base);
+  s.layers = s.layers.filter(l => l.type !== 'symbol');      // no glyph/sprite fetches from GSI
+  delete s.glyphs; delete s.sprite;
+  s.sources = { v: { type: 'vector', encoding: 'mlt', minzoom: 13, maxzoom: 16, bounds: BOUNDS,
+    tiles: [`${location.origin}/data/mlt/tokyo/${variant}/{z}/{x}/{y}.mlt`] } };
+  if (doShift) {
+    s.layers = s.layers.map(l => {
+      l = shift(l);
+      if (l.minzoom != null) l.minzoom -= 1;
+      if (l.maxzoom != null) l.maxzoom -= 1;
+      return l;
+    });
+  }
+  return s;
+};
+fetch('/data/bvmap/std.json').then(r => r.json()).then(base => {
+  const q = new URLSearchParams(location.search);
+  const z = +(q.get('z') || 15), c = (q.get('c') || '139.7671,35.6812').split(',').map(Number);
+  const L = new maplibregl.Map({ container: 'l', style: mk(base, 'bvmap', false), center: c, zoom: z + 1, minZoom: 13, maxZoom: 18 });
+  const R = new maplibregl.Map({ container: 'r', style: mk(base, 'hyp', true), center: c, zoom: z, minZoom: 12, maxZoom: 17 });
+  window.L = L; window.R = R;
+  let lock = false;
+  const sync = (from, to, dz) => from.on('move', () => { if (lock) return; lock = true;
+    to.jumpTo({ center: from.getCenter(), zoom: from.getZoom() + dz }); lock = false;
+    document.getElementById('ll').textContent = `bvmap 表示 z${L.getZoom().toFixed(2)}`;
+    document.getElementById('rl').textContent = `koicha hyp 表示 z${R.getZoom().toFixed(2)}`; });
+  sync(L, R, -1); sync(R, L, +1);
+  for (const m of [L, R]) m.on('error', e => (window.__errs = window.__errs || []).push(String(e.error && e.error.message || e.error)));
+});
+</script></body></html>

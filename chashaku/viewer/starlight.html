@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><title>bvmap-koicha-starlight check</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="node_modules/maplibre-gl/dist/maplibre-gl.css">
+<style>
+ html,body{margin:0;height:100%;font:13px system-ui} #wrap{display:flex;height:100%}
+ .pane{flex:1;position:relative} .map{position:absolute;inset:0}
+ .label{position:absolute;z-index:2;top:8px;left:8px;background:#fffd;padding:4px 8px;border-radius:4px}
+</style></head><body>
+<div id="wrap">
+ <div class="pane"><div id="l" class="map"></div><div class="label" id="ll"></div></div>
+ <div class="pane"><div id="r" class="map"></div><div class="label" id="rl"></div></div>
+</div>
+<script type="module">
+import * as maplibregl from "./node_modules/maplibre-gl/dist/maplibre-gl.mjs";
+// Left: upstream bvmap-starlight on bvmap tiles (MLT-converted) at zoom z+1.  Right: bvmap-koicha-starlight on `hyp` tiles at zoom z.
+// Only the source is swapped to local tiles; glyphs and sprite stay as in the style.
+const BOUNDS = [139.73, 35.65, 139.80, 35.71];
+const withLocal = (style, variant) => {
+  const s = structuredClone(style);
+  s.sources.bvmap = { type: 'vector', encoding: 'mlt', minzoom: 13, maxzoom: 16, bounds: BOUNDS,
+    tiles: [`${location.origin}/data/mlt/tokyo/${variant}/{z}/{x}/{y}.mlt`] };
+  return s;
+};
+const q = new URLSearchParams(location.search);
+const z = +(q.get('z') || 15), c = (q.get('c') || '139.7671,35.6812').split(',').map(Number);
+const [up, ko] = await Promise.all([fetch('/style/upstream/bvmap-starlight.json').then(r => r.json()),
+                                    fetch('/style/bvmap-koicha-starlight.json').then(r => r.json())]);
+const L = new maplibregl.Map({ container: 'l', style: withLocal(up, 'bvmap'), center: c, zoom: z + 1, minZoom: 13, maxZoom: 18 });
+const R = new maplibregl.Map({ container: 'r', style: withLocal(ko, 'hyp'), center: c, zoom: z, minZoom: 12, maxZoom: 17 });
+window.L = L; window.R = R; window.__errs = [];
+let lock = false;
+const sync = (from, to, dz) => from.on('move', () => { if (lock) return; lock = true;
+  to.jumpTo({ center: from.getCenter(), zoom: from.getZoom() + dz }); lock = false;
+  document.getElementById('ll').textContent = `bvmap-starlight 表示 z${L.getZoom().toFixed(2)}`;
+  document.getElementById('rl').textContent = `bvmap-koicha-starlight 表示 z${R.getZoom().toFixed(2)}`; });
+sync(L, R, -1); sync(R, L, +1);
+for (const m of [L, R]) m.on('error', e => window.__errs.push(String(e.error && e.error.message || e.error)));
+</script></body></html>

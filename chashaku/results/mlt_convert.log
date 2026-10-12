@@ -1,0 +1,60 @@
+$ /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../tools/mlt-0.4.3/mlt convert --verify /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../data/variants/obihiro-rural/bvmap /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../data/mlt/obihiro-rural/bvmap
+exit=0
+  dedup: 996 unique encoded, 0 cached (0.0% hit rate, ~0B of encode work skipped); cache weight 0B
+
+$ /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../tools/mlt-0.4.3/mlt convert --verify /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../data/variants/obihiro-rural/contra /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../data/mlt/obihiro-rural/contra
+exit=0
+  dedup: 268 unique encoded, 0 cached (0.0% hit rate, ~0B of encode work skipped); cache weight 0B
+
+$ /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../tools/mlt-0.4.3/mlt convert --verify /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../data/variants/obihiro-rural/hyp /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../data/mlt/obihiro-rural/hyp
+exit=0
+  dedup: 996 unique encoded, 0 cached (0.0% hit rate, ~0B of encode work skipped); cache weight 37.7kB
+
+$ /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../tools/mlt-0.4.3/mlt convert --verify /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../data/variants/osaka/bvmap /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../data/mlt/osaka/bvmap
+exit=0
+  dedup: 253 unique encoded, 0 cached (0.0% hit rate, ~0B of encode work skipped); cache weight 0B
+
+$ /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../tools/mlt-0.4.3/mlt convert --verify /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../data/variants/osaka/contra /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../data/mlt/osaka/contra
+exit=0
+  dedup: 85 unique encoded, 0 cached (0.0% hit rate, ~0B of encode work skipped); cache weight 0B
+
+$ /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../tools/mlt-0.4.3/mlt convert --verify /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../data/variants/osaka/hyp /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../data/mlt/osaka/hyp
+exit=0
+  dedup: 253 unique encoded, 0 cached (0.0% hit rate, ~0B of encode work skipped); cache weight 0B
+
+$ /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../tools/mlt-0.4.3/mlt convert --verify /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../data/variants/sapporo/bvmap /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../data/mlt/sapporo/bvmap
+exit=0
+  dedup: 186 unique encoded, 0 cached (0.0% hit rate, ~0B of encode work skipped); cache weight 0B
+
+$ /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../tools/mlt-0.4.3/mlt convert --verify /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../data/variants/sapporo/contra /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../data/mlt/sapporo/contra
+exit=0
+  dedup: 54 unique encoded, 0 cached (0.0% hit rate, ~0B of encode work skipped); cache weight 0B
+
+$ /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../tools/mlt-0.4.3/mlt convert --verify /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../data/variants/sapporo/hyp /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../data/mlt/sapporo/hyp
+exit=0
+  dedup: 186 unique encoded, 0 cached (0.0% hit rate, ~0B of encode work skipped); cache weight 0B
+
+$ /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../tools/mlt-0.4.3/mlt convert --verify /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../data/variants/taisetsu/bvmap /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../data/mlt/taisetsu/bvmap
+exit=0
+  dedup: 1065 unique encoded, 0 cached (0.0% hit rate, ~0B of encode work skipped); cache weight 808B
+
+$ /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../tools/mlt-0.4.3/mlt convert --verify /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../data/variants/taisetsu/contra /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../data/mlt/taisetsu/contra
+exit=0
+  dedup: 282 unique encoded, 0 cached (0.0% hit rate, ~0B of encode work skipped); cache weight 0B
+
+$ /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../tools/mlt-0.4.3/mlt convert --verify /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../data/variants/taisetsu/hyp /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../data/mlt/taisetsu/hyp
+exit=0
+  dedup: 1065 unique encoded, 0 cached (0.0% hit rate, ~0B of encode work skipped); cache weight 1.5kB
+
+$ /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../tools/mlt-0.4.3/mlt convert --verify /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../data/variants/tokyo/bvmap /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../data/mlt/tokyo/bvmap
+exit=0
+  dedup: 253 unique encoded, 0 cached (0.0% hit rate, ~0B of encode work skipped); cache weight 0B
+
+$ /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../tools/mlt-0.4.3/mlt convert --verify /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../data/variants/tokyo/contra /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../data/mlt/tokyo/contra
+exit=0
+  dedup: 71 unique encoded, 0 cached (0.0% hit rate, ~0B of encode work skipped); cache weight 0B
+
+$ /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../tools/mlt-0.4.3/mlt convert --verify /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../data/variants/tokyo/hyp /Users/hfu/bvmap-koicha/.claude/worktrees/bvmap-koicha-measurement-4ae350/chashaku/../data/mlt/tokyo/hyp
+exit=0
+  dedup: 253 unique encoded, 0 cached (0.0% hit rate, ~0B of encode work skipped); cache weight 0B
+

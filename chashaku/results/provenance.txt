@@ -1,0 +1,10 @@
+# provenance of the bvmap extracts used by chashaku
+
+fetched_at (UTC): 2026-10-12T10:36:56Z
+source: https://cyberjapandata.gsi.go.jp/xyz/optimal_bvmap-v1/optimal_bvmap-v1.pmtiles
+content-length: 16900763181
+last-modified: Thu, 17 Sep 2026 07:32:00 GMT
+etag: "dfa81a9cba11aad28247d63a2d8361ec-2015"
+readme data update: 2026-07-01 (readme: 2026-09-17 updated)
+low-zoom single tiles (tokyo center, z4-12, 9 tiles) fetched with 'pmtiles tile' at about 2026-10-12T10:39Z
+tools: pmtiles 1.28.0 (9a400a68d039dfa71e1706f154139558cbd1999f), mlt 0.4.3 (rust-mlt-v0.4.3, sha256 c3796143381b6178b10335b1873cf36fb6b5279efcadf630bf3fa31550ba2a68), python 3.9.6, macOS 27.0.1 arm64
