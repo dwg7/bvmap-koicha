@@ -6,7 +6,7 @@ koicha tile zoom z carries bvmap's z+1 content (D3, `hyp`), so every zoom value 
   - stops of ["step", ["zoom"], ...]               (n -> n-1)
   - stops of ["interpolate*", _, ["zoom"], ...]    (n -> n-1)
 Nothing else in the style is changed except the source (tiles come from bvmap-koicha, MLT) and the attribution.
-Usage: make_koicha_starlight.py [--source-url URL] [-o OUT]
+Usage: make_koicha_starlight.py [--source-url URL] [--minzoom N] [-o OUT]
 """
 import argparse
 import copy
@@ -51,6 +51,7 @@ def count_zoom_refs(o):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--source-url", default=DEFAULT_URL)
+    ap.add_argument("--minzoom", type=int, default=3, help="source minzoom (3 for the tokyo set; 4 for the hokkaido cell set)")
     ap.add_argument("-o", "--out", default=os.path.join(HERE, "bvmap-koicha-starlight.json"))
     a = ap.parse_args()
     up = json.load(open(UPSTREAM))
@@ -70,7 +71,7 @@ def main():
     s["name"] = "bvmap-koicha-starlight (bvmap-starlight with zoom values shifted by -1 for bvmap-koicha tiles)"
     src = s["sources"]["bvmap"]
     s["sources"]["bvmap"] = {
-        "type": "vector", "url": a.source_url, "encoding": "mlt", "minzoom": 3, "maxzoom": 16,
+        "type": "vector", "url": a.source_url, "encoding": "mlt", "minzoom": a.minzoom, "maxzoom": 16,
         "attribution": ATTRIBUTION,
     }
     s["metadata"] = {"derived-from": "dwg7/bvmap style/bvmap-starlight.json @ 9068c809beeecaec2a97366f8e1a6e210459eacd",

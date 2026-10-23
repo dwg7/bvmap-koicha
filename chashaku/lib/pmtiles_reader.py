@@ -117,3 +117,45 @@ def read_metadata(path):
         hd = read_header(f)
         f.seek(hd["meta_off"])
         return json.loads(_decompress(f.read(hd["meta_len"]), hd["internal_comp"]))
+
+
+class PMTilesIndex:
+    """Random access to a PMTiles v3 archive: (z, x, y) -> stored bytes. Keeps only the directory index in memory
+    (offset, length per tile), so it scales to archives with ~10^6 tiles. Safe to fork: each process opens its own file handle
+    lazily via `get`."""
+
+    def __init__(self, path):
+        self.path = path
+        self.index = {}
+        self._f = None
+        with open(path, "rb") as f:
+            hd = read_header(f)
+            self.header = hd
+
+            def load(off, ln):
+                f.seek(off)
+                return _read_dir(_decompress(f.read(ln), hd["internal_comp"]))
+
+            stack = [load(hd["root_off"], hd["root_len"])]
+            while stack:
+                for tid, run, off, ln in stack.pop():
+                    if run == 0:
+                        stack.append(load(hd["ldir_off"] + off, ln))
+                    else:
+                        for k in range(run):
+                            self.index[_id_to_zxy(tid + k)] = (hd["data_off"] + off, ln)
+
+    def __contains__(self, zxy):
+        return zxy in self.index
+
+    def keys(self):
+        return self.index.keys()
+
+    def get(self, z, x, y):
+        loc = self.index.get((z, x, y))
+        if loc is None:
+            return None
+        if self._f is None:
+            self._f = open(self.path, "rb")
+        self._f.seek(loc[0])
+        return self._f.read(loc[1])
