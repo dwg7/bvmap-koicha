@@ -638,3 +638,35 @@ D13 の直前に私が示した「同じタイル 15/29102/12905 で、MLT が 2
 - D7〜D9、D11 などの過去の記述は、書いた時点の名前(`chashaku/viewer/`、`tiles_mvt.csv`)のまま残す(追記専用)。現在の名前は `CLAUDE.md` と各 README が正。
 - D11 の保留事項(これらの整理)は、これで解決。
 
+---
+
+## D21: `bvmap-koicha-hokkaido.pmtiles` を stars に配置し、スタイル更新の PR を出した(hfu/stars#15)
+
+**Status**: Accepted (2026-10-24) — hfu さんの指示(「進めよう」)と、Cloudflare Access の認証
+
+### 本番への変更(この 1 点のみ。Martin の再起動・設定変更はしていない)
+
+- `/home/stars/data/bvmap-koicha-hokkaido.pmtiles`(3,221,824,917 B)を新規追加。仮名 `.partial` で転送(約 5MB/s、約 10 分)→ リモートで sha256 を照合
+  (`a91a906a9493d47a083a2da7a1965d3d1ff021080c2e7b63485c46748249cada`、ローカルと一致)→ 同名ファイルがないことを確認して `mv` で公開。事前の空きは 1.3T(事後も 1.3T)。
+
+### 確認したこと(`?cb=` でキャッシュを避け、`cf-cache-status: MISS`)
+
+- `/catalog` に `bvmap-koicha-hokkaido`(`application/vnd.maplibre-tile`)が、**Martin の再起動なしで**ファイル監視により出た(`bvmap-koicha-tokyo` も同様)。
+- `/bvmap-koicha-hokkaido` の TileJSON: `minzoom 4`、`maxzoom 16`、bounds `135.0,40.979898,157.5,55.776573`、24 層。
+- 複合 `/bvmap-koicha-hokkaido,bvmap-koicha-tokyo`: 200、`minzoom 3`、`maxzoom 16`、bounds は両方を覆い、48 層。
+  タイル: 札幌 15/29256/12027(56,099 B)、東京 15/29102/12905(20,541 B)、最大の日高山地 13/7348/3025(**206,630 B** = 201.8KB。D18 の数字と一致)がいずれも 200。
+- 稼働中の Martin の RSS は約 595MB(稼働 17 分時点)。**再起動したときの起動時間と、77 万タイルを読み込むメモリは未確認。**
+
+### スタイルの更新(hfu/stars#15)
+
+- [hfu/stars#15](https://github.com/hfu/stars/pull/15): `styles/bvmap-koicha-starlight.json` の `sources.bvmap.url` の 1 行だけを
+  `https://stars.optgeo.org/bvmap-koicha-hokkaido,bvmap-koicha-tokyo` に変える(既存スタイルの編集なので Martin の restart は不要、CONTRIBUTING の表)。
+  差分が 1 行だけであることを確認してから出した。マージと反映は stars 側の手順(gatekeeper)に従う。
+- マージされるまで、公開中のスタイルは東京だけを指す(北海道は出ない)。マージ後は、`https://stars.optgeo.org/style/bvmap-koicha-starlight` を
+  `?cb=` で確認し、北海道・東京の両方が描画されることを確かめる(こちらの仕事)。
+
+### 保留事項
+
+- stars の Martin を再起動するときの、読み込み時間とメモリ(3.2GB・77 万タイルの PMTiles)の確認。
+- 全国版 `bvmap-koicha`(D2/D19: 約 21〜23GB の見積もり。セルごとに作る。取得量が大きいので、方法を相談してから)。
+
