@@ -607,3 +607,34 @@ D13 の直前に私が示した「同じタイル 15/29102/12905 で、MLT が 2
   北海道のセル `4/14/5` の外なので重ならない(ただし z3〜z12 の縁は欠ける。D9)。
 - 重なるタイルの複合(同じ z/x/y が両方にある場合)は、未確認。MLT のタイルを結合できるかは分からないので、重ねないことを規則にする。
 
+---
+
+## D20: 名前の整理 — stars の公開名は規則化、リポジトリ内は `viewer/` と `tiles_mvt_only.csv`
+
+**Status**: Accepted (2026-10-24) — hfu さんの指示(「配置についてはファイル名整理」→ stars の名前とリポジトリ内の両方)
+
+### stars で公開する名前
+
+| 種類 | 名前 | 備考 |
+|---|---|---|
+| 範囲ごとのタイル | `bvmap-koicha-<範囲>.pmtiles`(source ID は同名) | 現在: `bvmap-koicha-hokkaido`(空間 ID `4/14/5`)、`bvmap-koicha-tokyo`(bbox) |
+| 全国版(将来) | `bvmap-koicha.pmtiles` | できたら、スタイルの `source.url` をこれ 1 つにして、範囲ごとのファイルを退役する |
+| スタイル | `bvmap-koicha-starlight` | 1 つのスタイルを全範囲で使う(範囲ごとにスタイルを分けない) |
+
+- **スタイルの `source.url` は、範囲ごとのタイルの Martin 複合ソース**: `https://stars.optgeo.org/bvmap-koicha-hokkaido,bvmap-koicha-tokyo`
+  (`style/make_koicha_starlight.py` の既定値 `DEFAULT_URL`)。範囲を足したら、この列を増やして再生成し、stars のスタイルを更新する。
+- **規則**: 範囲どうしは**重ならないこと**(空間 ID のセルで切れば排他的。D19)。重なるタイルの複合は未確認で、使わない。
+- ローカルの確認: 本番と同じ Martin 1.14.0 に `bvmap-koicha-hokkaido` と `bvmap-koicha-tokyo` を載せ、複合ソースのスタイルを MapLibre GL JS で表示し、
+  札幌 z14・z16、東京 z14・z16、宗谷岬 z10、択捉 z8 が、エラーなしで描画された。
+- stars に載せる順序(この順で、配置は hfu さんの確認と Cloudflare Access の認証のもとで行う): ①`bvmap-koicha-hokkaido.pmtiles`(3.2GB)を `/home/stars/data/` へ
+  (仮名で転送、sha256 照合、`mv`)→ ②`/catalog` と複合 TileJSON を `?cb=` で確認 → ③`hfu/stars` へ PR(`styles/bvmap-koicha-starlight.json` の既存ファイルの編集。
+  **既存スタイルの編集なので Martin の restart は不要**、CONTRIBUTING の表)→ ④マージ後に stars 側が反映。
+
+### リポジトリ内の名前
+
+- **`chashaku/viewer/` → `viewer/`**(トップレベル)。計測とビルドの両方が使うため。npm パッケージの `node_modules` も一緒に移した(git の管理外)。
+  URL は `http://127.0.0.1:8765/viewer/...`、起動は `python3 viewer/serve.py`、`style/validate.mjs` の参照先も直した。
+- **`chashaku/results/tiles_mvt.csv` → `tiles_mvt_only.csv`**(MVT だけの中間ファイル。`tiles.csv` が MLT も入った最終版)。`measure.py` と `encode_mlt.py` を直した。
+- D7〜D9、D11 などの過去の記述は、書いた時点の名前(`chashaku/viewer/`、`tiles_mvt.csv`)のまま残す(追記専用)。現在の名前は `CLAUDE.md` と各 README が正。
+- D11 の保留事項(これらの整理)は、これで解決。
+

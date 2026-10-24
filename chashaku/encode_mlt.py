@@ -1,6 +1,6 @@
 """chashaku/encode_mlt.py — convert every variant tile to MLT with `mlt convert --verify` and record sizes.
 
-Reads  chashaku/results/tiles_mvt.csv + data/variants/**.mvt
+Reads  chashaku/results/tiles_mvt_only.csv + data/variants/**.mvt
 Writes data/mlt/<area>/<variant>/... , chashaku/results/tiles.csv, chashaku/results/mlt_convert.log
 Usage: encode_mlt.py [extra mlt convert flags...]   (e.g. --sort auto); results go to tiles_<tag>.csv if MLT_TAG is set.
 """
@@ -16,7 +16,7 @@ MLT = os.path.join(ROOT, "..", "tools", "mlt-0.4.3", "mlt")
 TAG = os.environ.get("MLT_TAG", "")
 extra = sys.argv[1:]
 
-rows = list(csv.DictReader(open(os.path.join(ROOT, "results", "tiles_mvt.csv"))))
+rows = list(csv.DictReader(open(os.path.join(ROOT, "results", "tiles_mvt_only.csv"))))
 combos = sorted({(r["area"], r["variant"]) for r in rows})
 log = open(os.path.join(ROOT, "results", f"mlt_convert{('_' + TAG) if TAG else ''}.log"), "w")
 outdir = os.path.join(DATA, "mlt" + (("_" + TAG) if TAG else ""))

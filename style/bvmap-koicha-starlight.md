@@ -9,8 +9,8 @@ bvmap-koicha のタイル(z は bvmap の z+1 の内容を持つ。DECISIONS D3/
 `style/upstream/bvmap-starlight.json`(dwg7/bvmap の `9068c809`、2026-10-06 のスナップショット)から生成する。
 
 ```bash
-python3 -I style/make_koicha_starlight.py --source-url pmtiles://https://example.org/bvmap-koicha.pmtiles
-node style/validate.mjs style/bvmap-koicha-starlight.json   # 要: npm ci --prefix chashaku/viewer
+python3 -I style/make_koicha_starlight.py            # source = stars' composite of the regional sets (DEFAULT_URL); --source-url / --minzoom to override
+node style/validate.mjs style/bvmap-koicha-starlight.json   # 要: npm ci --prefix viewer
 ```
 
 変えるのは次だけ(配色・構造・フォント・スプライトは触らない):
@@ -28,12 +28,13 @@ node style/validate.mjs style/bvmap-koicha-starlight.json   # 要: npm ci --pref
 ## 確かめたこと
 
 - `@maplibre/maplibre-gl-style-spec` のバリデーションを通る(上流・生成物とも 0 エラー)。
-- MapLibre GL JS 6.14.0 で、tokyo の `hyp` タイルに対して描画できた(`chashaku/viewer/starlight.html`)。左は上流の bvmap-starlight(bvmap のタイル、z+1)、
+- MapLibre GL JS 6.14.0 で、tokyo の `hyp` タイルに対して描画できた(`viewer/starlight.html`)。左は上流の bvmap-starlight(bvmap のタイル、z+1)、
   右は本スタイル(`hyp`、z)。z15・z16 で、道路・建物・鉄道・注記・アイコンが出て、ブラウザのエラーはなかった。z16 では道路縁や軌道も出る。
 
 ## まだ確かめていないこと
 
 - **z3〜z12 の見た目は tokyo 限定版で確認済み**(D9。z4〜z7 は extent 32768 で、MLT として復号・描画できた)。全国の見た目は未確認。
 - 上流との画素単位の一致(縮尺が違うので比べられない)。注記の重なり・配置の質は目視のみ。
-- `source.url`(配信先)は未定。`glyphs` と `sprite` は上流のまま `stars.optgeo.org` を指す(hfu/stars の配信)。
+- `source.url` は、stars の複合ソース `https://stars.optgeo.org/bvmap-koicha-hokkaido,bvmap-koicha-tokyo`(D20)。範囲を足したら、この列を増やして再生成する。
+  `glyphs` と `sprite` は上流のまま `stars.optgeo.org` を指す(hfu/stars の配信)。
 - 上流が更新されたら、スナップショットを差し替えて再生成する(`style/upstream/README.md`)。

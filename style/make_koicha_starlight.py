@@ -15,7 +15,8 @@ import os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 UPSTREAM = os.path.join(HERE, "upstream", "bvmap-starlight.json")
-DEFAULT_URL = "pmtiles://REPLACE-WITH-bvmap-koicha.pmtiles-URL"
+# Martin composite source: every regional bvmap-koicha tile set served by stars (cells are disjoint, DECISIONS D19/D20)
+DEFAULT_URL = "https://stars.optgeo.org/bvmap-koicha-hokkaido,bvmap-koicha-tokyo"
 ATTRIBUTION = ("国土地理院最適化ベクトルタイルを加工して作成。"
                "スプライトアイコンは国土地理院最適化ベクトルタイルの原本を改変(グレースケール化)して使用。"
                "改変者: dwg7/bvmap、dwg7/bvmap-koicha。国土地理院コンテンツ利用規約に基づく。"

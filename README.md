@@ -33,6 +33,8 @@ bvmap は、公開当時の帯域とブラウザの制約に合わせてタイ�
 | [CLAUDE.md](CLAUDE.md) | 作業規則(人とエージェント向け) |
 | [style/bvmap-koicha-starlight.md](style/bvmap-koicha-starlight.md) | bvmap-starlight のズーム値を一段ずらしたスタイル |
 | `chashaku/` | 計測のコード(Python 標準ライブラリのみ)と `results/`(CSV) |
+| `build/` | 範囲限定の PMTiles のビルド(tokyo は bbox、hokkaido は空間 ID `4/14/5`) |
+| `viewer/` | 描画確認用の MapLibre GL JS ページ(npm パッケージは `node_modules`、git の管理外) |
 | `tools/` | 取得・検証用スクリプト(バイナリはコミットしない) |
 
 再現: `chashaku/run_all.sh`(取得は `chashaku/fetch.sh`。地理院のサーバーには必要な範囲だけ、ドライランで確認してから取りに行きます)。

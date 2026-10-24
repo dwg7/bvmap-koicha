@@ -7,7 +7,7 @@ Arrangements (see CLAUDE.md / DECISIONS.md D3):
   contra : koicha z13/z14 as hyp; z15 = 4 bvmap z16 tiles bundled as-is (z16 + z17 content, extent x2). No z16.
 
 Only bundling (coordinate translation, extent x2) and dropping are applied; features are never edited.
-Outputs: data/variants/<area>/<variant>/<z>/<x>/<y>.mvt (raw MVT) and chashaku/results/tiles_mvt.csv.
+Outputs: data/variants/<area>/<variant>/<z>/<x>/<y>.mvt (raw MVT) and chashaku/results/tiles_mvt_only.csv.
 """
 import csv
 import gzip
@@ -115,7 +115,7 @@ def main():
         print(area, "done", len(src), "source tiles", flush=True)
 
     os.makedirs(os.path.join(ROOT, "results"), exist_ok=True)
-    with open(os.path.join(ROOT, "results", "tiles_mvt.csv"), "w", newline="") as f:
+    with open(os.path.join(ROOT, "results", "tiles_mvt_only.csv"), "w", newline="") as f:
         w = csv.writer(f)
         w.writerow(["area", "variant", "z", "x", "y", "n_children", "mvt_raw", "mvt_gz9", "bvmap_stored_gz",
                     "features", "vertices", "extent"])

@@ -4,7 +4,7 @@
  "sources": {
   "bvmap": {
    "type": "vector",
-   "url": "pmtiles://REPLACE-WITH-bvmap-koicha.pmtiles-URL",
+   "url": "https://stars.optgeo.org/bvmap-koicha-hokkaido,bvmap-koicha-tokyo",
    "encoding": "mlt",
    "minzoom": 3,
    "maxzoom": 16,
