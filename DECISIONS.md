@@ -670,3 +670,38 @@ D13 の直前に私が示した「同じタイル 15/29102/12905 で、MLT が 2
 - stars の Martin を再起動するときの、読み込み時間とメモリ(3.2GB・77 万タイルの PMTiles)の確認。
 - 全国版 `bvmap-koicha`(D2/D19: 約 21〜23GB の見積もり。セルごとに作る。取得量が大きいので、方法を相談してから)。
 
+---
+
+## D22: bvmap-koicha-starlight が、北海道と東京の複合ソースで公開された(hfu/stars#15)
+
+**Status**: Accepted (2026-10-24)
+
+### 経緯
+
+- hfu さんの指示「あなたと stars で協調して実行してくれればいい」に従い、stars の gatekeeper セッション(`stars`)と、セッション間メッセージで連携した。
+  stars から質問(配信・スタイルの方針、ズーム下限、容量の見通し)が来たので、D18〜D21 に基づいて回答した。
+  マージと本番反映は、**stars 側が hfu さんに直接確認してから実施**した(こちらは本番を変更していない。中継した承認を確認として扱わない、という stars の規則に従った)。
+- [hfu/stars#15](https://github.com/hfu/stars/pull/15) は 2026-10-24T06:58Z に squash マージ(`ad7dfb8`)。stars 側の記録: 既存ファイルの backup → マージ済みの版を配置
+  → sha256 照合 → `?cb=` で確認 → backup 削除。**Martin の再起動なし、全断なし**(既存ファイルの編集のため)。
+
+### こちらで独立に確認したこと(stars の報告を鵜呑みにせず、実際の状態を見た)
+
+- `https://stars.optgeo.org/style/bvmap-koicha-starlight`(`?cb=`、200、`cf-cache-status: MISS`): `sources.bvmap.url` が
+  `https://stars.optgeo.org/bvmap-koicha-hokkaido,bvmap-koicha-tokyo`、123 層で、**このリポジトリの `style/bvmap-koicha-starlight.json` と完全に一致**。
+- 公開 URL のスタイルだけを MapLibre GL JS 6.14.0 に渡して描画(エラーなし):
+  札幌 z14・z15・z16、東京 z14、宗谷岬 z11、択捉島(島内の座標 146.90E, 44.45N)z12、色丹島 z12、日高山地 z13。札幌駅周辺 z15 は建物が密に出る。
+- stars の報告のうち、択捉島の一点(147.90E, 44.90N)で z13/z14/z16 が 204(空タイル)になる件は、**座標が海上だったため**で、データの欠落ではない
+  (島内の座標では全ズームで 200)。こちらの確認でも、島内では地物が描画された。
+
+### 結果
+
+- bvmap-koicha は、**stars で北海道(`4/14/5`)と東京の 2 範囲をカバーする、公開されたタイルセット + スタイル**になった。
+- stars の `docs/KNOWN_FACTS.md`(`5c2937e`)にも記録された。**注意**: そこにある「MLT PMTiles は無圧縮限定」は、こちらの申告(D16。Martin 1.14.0 をローカルで確認)であり、stars 側では未検証と明記されている。
+- 範囲を足すときの手順: セルごとに `build/build.sh` で作る → `/home/stars/data` に置く(再起動なしで自動発見)→ `style/make_koicha_starlight.py` の `DEFAULT_URL` に ID を足して再生成 →
+  hfu/stars へ既存スタイルの編集 PR(再起動は不要)。全国版 `bvmap-koicha` に統合したら、`source.url` を 1 つに戻す(D20)。
+
+### 保留事項
+
+- Martin 再起動時の、3.2GB・77 万タイルの読み込み時間とメモリ(D21)。
+- 全国版(約 21〜23GB の見積もり、セルごとに作る)。取得量の大きさから、方法を相談してから進める。
+
