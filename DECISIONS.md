@@ -705,3 +705,42 @@ D13 の直前に私が示した「同じタイル 15/29102/12905 で、MLT が 2
 - Martin 再起動時の、3.2GB・77 万タイルの読み込み時間とメモリ(D21)。
 - 全国版(約 21〜23GB の見積もり、セルごとに作る)。取得量の大きさから、方法を相談してから進める。
 
+---
+
+## D23: テストサイトは GitHub Pages(`docs/`)で公開する — https://dwg7.unopengis.org/bvmap-koicha/
+
+**Status**: Accepted (2026-10-27) — hfu さんの指示
+
+### 背景
+
+公開されていたのは stars のスタイルとタイルの URL だけで、人が見る場所は Martin のダッシュボードだけだった。
+スタイル `https://stars.optgeo.org/style/bvmap-koicha-starlight` を単独で開いても、地図の初期位置が東京にも北海道にも当たらず、何も見えない。
+ダッシュボードの検査画面は、`bvmap-koicha-hokkaido` の地図が空白で(原因は未確認)、スタイルのカードのプレビューも、地図として確認できなかった。
+HTML のテストページは、depot(`/home/stars/data` の静的配信)ではなく、**このリポジトリの GitHub Pages** に置くべき、という hfu さんの判断。
+
+### 決定
+
+- `docs/index.html` を、GitHub Pages(`main` の `/docs`)で公開する。**URL: https://dwg7.unopengis.org/bvmap-koicha/**
+  (組織のカスタムドメイン `dwg7.unopengis.org` の下。`https://dwg7.github.io/bvmap-koicha/` も同じ場所。plateau-juice と同じ形)。
+  Pages の有効化はこの指示のもとで私が行った(`gh api`、`source: main /docs`)。
+- ページの中身: 左に元の `bvmap-starlight`、右に `bvmap-koicha-starlight`(どちらも stars のスタイルの URL)を、**同じ位置・同じ表示ズーム**で連動して並べる(濃さの違いが見える)。
+  - 位置は URL の **`#ズーム/緯度/経度`** で指定できる(MapLibre の `hash`)。例: `#15/43.0687/141.3540`(札幌駅)。
+  - 「場所」のボタン: 札幌駅 z15、東京駅 z15、日高山地 z13(等高線が最も重い)、稚内 z11、択捉島 z12、釧路湿原 z9、北海道全体 z6。
+  - 表示位置が bvmap-koicha の範囲外(北海道のセル `4/14/5` と東京の小矩形の外)のときは、警告を出す。
+  - 「bvmap-koicha だけを表示」で単独表示。幅 700px 以下では上下に並べる。出典(国土地理院最適化ベクトルタイルを加工して作成)と、公式ではない旨を、ページとフッターに入れた。
+- MapLibre GL JS 6.14.0 を `docs/vendor/maplibre-gl-6.14.0/`(ESM 3 ファイル + CSS + LICENSE、約 1.7MB)に**同梱**し、第三者の CDN に依存しない。`docs/.nojekyll` で Jekyll を無効にした。
+- Martin のダッシュボード(`?tab=tiles&inspect=...#map=z/lat/lng`)は、位置を指定できるが、MLT のタイルの検査画面が空白だった。
+  このページが、人が見る正式な確認場所になる。
+
+### 確認したこと
+
+- ローカル(`viewer/serve.py`)と、公開 URL(`https://dwg7.unopengis.org/bvmap-koicha/#15/43.0687/141.3540`)の両方で、左右とも描画された(エラーなし)。
+  東京駅・日高山地へのボタン、範囲外(沖縄)の警告、スマホ幅(375px)の縦並びも確認した。
+- 出典の欄(MapLibre の `<details open>`)は、読み込み後に閉じようとしても開き直すため、高さを抑える CSS(小さい文字、3 行)にした。全文はフッターにも常に出ている。
+
+### 保留事項
+
+- Pages は `https_enforced=false` のまま(`https://` では動く)。HTTPS の強制は、hfu さんの判断。
+- ページは、stars のスタイルと、地理院の PMTiles を配信する stars に依存する。
+- 範囲を足したら(D20)、「範囲外」の判定の座標と、場所のボタンを更新する。
+

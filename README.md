@@ -9,6 +9,8 @@
 *koicha — thick tea. The same matcha as usucha (thin tea), made with less water.*
 *bvmap-koicha takes the same GSI data as bvmap and brews it thicker: more buildings per tile, the same ingredients.*
 
+**テストページ(地図で見られます): https://dwg7.unopengis.org/bvmap-koicha/** — 左が元の bvmap-starlight、右が bvmap-koicha-starlight。位置は `#ズーム/緯度/経度` で指定できます(例: [札幌駅 z15](https://dwg7.unopengis.org/bvmap-koicha/#15/43.0687/141.3540))。
+
 ## 名前の由来
 
 濃茶(こいちゃ)は、薄茶と同じ抹茶を、少ない湯で濃く点てたものです。bvmap-koicha も、bvmap と同じ地理院のデータを、より濃く仕立てます。

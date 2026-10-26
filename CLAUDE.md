@@ -13,7 +13,7 @@ dwg7(UN Smart Maps Group)の活動で、**国土地理院の公式な製品で�
 ## 段階と、今やらないこと
 
 1. **計測(chashaku)** 済み(D6: maxzoom 16、D7: 描画確認)。作る前に測る。
-2. **スタイル bvmap-koicha-starlight**(D8)と、**tokyo の範囲限定 PMTiles**(D9、`build/build.sh tokyo`)作成済み。← 今ここ。配信は stars(hfu/stars)で行う(D10)。`bvmap-koicha-tokyo.pmtiles` は stars に載せて MLT 配信を確認済み(D13)。スタイル bvmap-koicha-starlight も stars で公開済み(hfu/stars#14、D14/D15)。タイル圧縮は D16 で一旦結論(当面は無圧縮。Martin が MLT + gzip/brotli/zstd 未対応なので、圧縮した MLT の PMTiles を stars の data に置かない)。**北海道版 `bvmap-koicha-hokkaido.pmtiles`(空間 ID `4/14/5`、768,230 タイル、3.22GB)を作成済み(D18。stars には未配置)。** 等高線は間引かない。タイルの上限は目安 256KB・最悪 512KB(D19。北海道版の最大は 202KB で収まる)。名前の規則は D20(スタイルは複合ソース `bvmap-koicha-hokkaido,bvmap-koicha-tokyo`)。**北海道版は stars に配置済み(D21)で、スタイルも複合ソース(北海道 + 東京)で公開済み(hfu/stars#15、D22)。** 次は、全国版の相談(セルごとに作り、stars へ足していく)。stars の gatekeeper セッションとは、セッション間メッセージで連携できる(stars 側が hfu さんに直接確認してから反映する)。stars への反映は、そのつど hfu さんの確認を得てから(本番への ssh は Cloudflare Access の認証を hfu さんが済ませる)。
+2. **スタイル bvmap-koicha-starlight**(D8)と、**tokyo の範囲限定 PMTiles**(D9、`build/build.sh tokyo`)作成済み。← 今ここ。配信は stars(hfu/stars)で行う(D10)。`bvmap-koicha-tokyo.pmtiles` は stars に載せて MLT 配信を確認済み(D13)。スタイル bvmap-koicha-starlight も stars で公開済み(hfu/stars#14、D14/D15)。タイル圧縮は D16 で一旦結論(当面は無圧縮。Martin が MLT + gzip/brotli/zstd 未対応なので、圧縮した MLT の PMTiles を stars の data に置かない)。**北海道版 `bvmap-koicha-hokkaido.pmtiles`(空間 ID `4/14/5`、768,230 タイル、3.22GB)を作成済み(D18。stars には未配置)。** 等高線は間引かない。タイルの上限は目安 256KB・最悪 512KB(D19。北海道版の最大は 202KB で収まる)。名前の規則は D20(スタイルは複合ソース `bvmap-koicha-hokkaido,bvmap-koicha-tokyo`)。**北海道版は stars に配置済み(D21)で、スタイルも複合ソース(北海道 + 東京)で公開済み(hfu/stars#15、D22)。** テストページは GitHub Pages(`docs/index.html`、https://dwg7.unopengis.org/bvmap-koicha/ 、D23)。範囲を足したら、ページの範囲判定とボタンも更新する。次は、全国版の相談(セルごとに作り、stars へ足していく)。stars の gatekeeper セッションとは、セッション間メッセージで連携できる(stars 側が hfu さんに直接確認してから反映する)。stars への反映は、そのつど hfu さんの確認を得てから(本番への ssh は Cloudflare Access の認証を hfu さんが済ませる)。
 
 計測の結果を見る前にやらない: 全国のタイルセットの生成、スタイルの作成、地物の簡略化・総描。
 dwg7/evergreen の言葉では、これは Cartographer ではなく Library 側のタイルセットである。
@@ -52,7 +52,8 @@ dwg7/evergreen の言葉では、これは Cartographer ではなく Library 側
 - `tools/` — `mlt` の取得・検証(バイナリはコミットしない)
 - `build/` — 範囲限定の bvmap-koicha PMTiles のビルド(`build.sh`、`build_koicha.py` は逐次処理、`regions.tsv` は空間 ID の領域、`stats_pmtiles.py`)
 - `style/` — bvmap-koicha-starlight(`make_koicha_starlight.py` の生成物。手で編集しない)と、上流のスナップショット `upstream/`
-- `viewer/` — 描画確認(`index.html`: 素のスタイル、`starlight.html`: starlight)
+- `viewer/` — 開発用の描画確認(`index.html`: 素のスタイル、`starlight.html`: starlight、ローカルのみ)
+- `docs/` — GitHub Pages のテストページ(`index.html`)と、同梱の MapLibre(`vendor/`)、`bvmap-anatomy.md`
 
 ## 計測の用語
 
