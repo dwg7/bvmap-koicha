@@ -14,6 +14,7 @@
   header { padding: 8px 16px; border-bottom: 1px solid var(--line); }
   h1 { font-size: 16px; margin: 0 0 2px; }
   .sub { color: var(--muted); font-size: 12px; margin: 0; }
+  .about { margin-top: 2px; } .about a { color: var(--accent); font-weight: 600; }
   nav { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 8px 16px; border-bottom: 1px solid var(--line); }
   nav button, nav label { font: inherit; }
   nav button { border: 1px solid var(--line); background: transparent; color: var(--fg); border-radius: 6px; padding: 3px 9px; cursor: pointer; }
@@ -42,6 +43,9 @@
 <header>
   <h1>bvmap-koicha テストページ</h1>
   <p class="sub">国土地理院最適化ベクトルタイル(bvmap)を、建築物がたっぷり入るように一段濃く仕立てたタイルセット。dwg7 の活動であり、国土地理院の公式な製品ではありません。</p>
+  <p class="sub about"><a href="https://github.com/dwg7/bvmap-koicha#readme">このプロジェクトについて(README)</a> —
+    何をやろうとしているか、名前の由来(濃茶)、タイルの作り方、決めたことの記録(DECISIONS)へのリンクがあります。
+    右の地図は、左と同じ表示ズームで、bvmap の一段上(z+1)の内容を見せています。</p>
 </header>
 <nav id="nav">
   <span>場所:</span>
@@ -58,7 +62,7 @@
 <div id="warn">この位置は bvmap-koicha の範囲外です(いまのタイルセットは、北海道(空間 ID 4/14/5)と東京の一部だけ)。上の「場所」から選んでください。</div>
 <div id="maps">
   <div class="pane" id="left-pane"><div class="tag">bvmap-starlight(元の bvmap)</div><div id="left" class="map"></div></div>
-  <div class="pane"><div class="tag">bvmap-koicha-starlight(濃茶)</div><div id="right" class="map"></div></div>
+  <div class="pane" id="right-pane"><div class="tag">bvmap-koicha-starlight(濃茶)</div><div id="right" class="map"></div></div>
 </div>
 <footer>
   左右は同じ位置・同じ表示ズームで連動します。位置は URL の <code>#ズーム/緯度/経度</code> で指定できます(例: <code>#15/43.0687/141.3540</code>)。
@@ -69,8 +73,20 @@
 <script type="module">
 import * as maplibregl from "./vendor/maplibre-gl-6.14.0/maplibre-gl.mjs";
 
-const STYLE_BASE = "https://stars.optgeo.org/style/bvmap-starlight";
-const STYLE_KOICHA = "https://stars.optgeo.org/style/bvmap-koicha-starlight";
+// ?left=<style> and ?right=<style> override the two styles (to review a proposal before it goes to stars).
+// Allowed: a path relative to this page (styles/xxx.json) or a style served by stars.optgeo.org.
+const param = (name, fallback) => {
+  const v = new URLSearchParams(location.search).get(name);
+  if (!v) return fallback;
+  const u = new URL(v, location.href);
+  const ok = (u.origin === location.origin && u.pathname.startsWith(new URL(".", location.href).pathname)) || u.origin === "https://stars.optgeo.org";
+  return ok ? u.href : fallback;
+};
+const STYLE_BASE = param("left", "https://stars.optgeo.org/style/bvmap-starlight");
+const STYLE_KOICHA = param("right", "https://stars.optgeo.org/style/bvmap-koicha-starlight");
+const tag = (u) => u.split("/").pop().replace(/\.json$/, "");
+if (STYLE_BASE !== "https://stars.optgeo.org/style/bvmap-starlight") document.querySelector("#left-pane .tag").textContent = tag(STYLE_BASE);
+if (STYLE_KOICHA !== "https://stars.optgeo.org/style/bvmap-koicha-starlight") document.querySelector("#right-pane .tag").textContent = tag(STYLE_KOICHA);
 // Coverage of the current bvmap-koicha tile sets: [west, south, east, north]
 const COVERAGE = [[135.0, 40.979898, 157.5, 55.776573], [139.73, 35.65, 139.80, 35.71]];
 

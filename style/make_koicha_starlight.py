@@ -6,14 +6,18 @@ koicha tile zoom z carries bvmap's z+1 content (D3, `hyp`), so every zoom value 
   - stops of ["step", ["zoom"], ...]               (n -> n-1)
   - stops of ["interpolate*", _, ["zoom"], ...]    (n -> n-1)
 Nothing else in the style is changed except the source (tiles come from bvmap-koicha, MLT) and the attribution.
-Usage: make_koicha_starlight.py [--source-url URL] [--minzoom N] [-o OUT]
+Usage: make_koicha_starlight.py [--source-url URL] [--minzoom N] [--no-patches] [-o OUT]
+After the shift, the koicha patches of style/patches.py are applied (contours, ...); see DECISIONS D24.
 """
 import argparse
 import copy
 import json
 import os
+import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import patches
 UPSTREAM = os.path.join(HERE, "upstream", "bvmap-starlight.json")
 # Martin composite source: every regional bvmap-koicha tile set served by stars (cells are disjoint, DECISIONS D19/D20)
 DEFAULT_URL = "https://stars.optgeo.org/bvmap-koicha-hokkaido,bvmap-koicha-tokyo"
@@ -52,6 +56,7 @@ def count_zoom_refs(o):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--source-url", default=DEFAULT_URL)
+    ap.add_argument("--no-patches", action="store_true", help="only shift the zoom values (D8); skip the koicha cartographic patches (D24)")
     ap.add_argument("--minzoom", type=int, default=3, help="source minzoom (3 for the tokyo set; 4 for the hokkaido cell set)")
     ap.add_argument("-o", "--out", default=os.path.join(HERE, "bvmap-koicha-starlight.json"))
     a = ap.parse_args()
@@ -77,6 +82,10 @@ def main():
     }
     s["metadata"] = {"derived-from": "dwg7/bvmap style/bvmap-starlight.json @ 9068c809beeecaec2a97366f8e1a6e210459eacd",
                      "zoom-shift": -1, "generator": "dwg7/bvmap-koicha style/make_koicha_starlight.py"}
+    if not a.no_patches:
+        for name, fn in patches.PATCHES:
+            s = fn(s)
+        s["metadata"]["patches"] = [n for n, _ in patches.PATCHES]
     with open(a.out, "w") as f:
         json.dump(s, f, ensure_ascii=False, indent=1)
         f.write("\n")
