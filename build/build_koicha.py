@@ -4,6 +4,7 @@ Streaming: tiles are read one koicha tile at a time from the bvmap PMTiles (dire
 
   koicha z<=14 : the 4 bvmap tiles of z+1 bundled (coordinates translated, extent x2)
   koicha z15   : 4 bvmap z16 tiles bundled; vt_flag17=2 features and the z17-only layers (RdEdg, RdCompt, RailTrCL, StrctLine) dropped
+                 (--roads: keep those four layers in z15, so true-width roads can be drawn from z15; DECISIONS D26)
   koicha z16   : bvmap z16 with vt_flag17=0 features dropped
 Only bundling and dropping; features are never edited.
 
@@ -32,6 +33,7 @@ from measure import Z17_ONLY_LAYERS, flag17_pred
 D = os.path.join(ROOT, "data")
 IDX = []          # PMTilesIndex objects (inherited by forked workers)
 DROP2 = flag17_pred(2)
+DROP_Z15_LAYERS = Z17_ONLY_LAYERS      # --roads empties this in main() before the workers are forked
 DROP0 = flag17_pred(0)
 
 
@@ -65,7 +67,7 @@ def make(job):
     if kind == "b":
         L = bundle(z, x, y)
     elif kind == "f15":
-        L = bundle(15, x, y, lambda t: mvt.filter_layers(t, Z17_ONLY_LAYERS, DROP2))
+        L = bundle(15, x, y, lambda t: mvt.filter_layers(t, DROP_Z15_LAYERS, DROP2))
     else:
         L = mvt.filter_layers(lookup(16, x, y), (), DROP0)
     if not L:
@@ -85,9 +87,13 @@ def main():
     ap.add_argument("area")
     ap.add_argument("--cell")
     ap.add_argument("--source", action="append")
+    ap.add_argument("--roads", action="store_true", help="keep the z17-only road layers (RdEdg, RdCompt, ...) in z15; output name gets a -roads suffix")
     ap.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) - 1))
     a = ap.parse_args()
     area = a.area
+    global DROP_Z15_LAYERS
+    if a.roads:
+        DROP_Z15_LAYERS = ()
     if a.cell:
         cz, cx, cy = map(int, a.cell.split("/"))
         bbox, minzoom = bbox_of(cz, cx, cy), cz
@@ -119,7 +125,7 @@ def main():
     print(f"koicha tiles to build: {len(jobs):,}", flush=True)
 
     os.makedirs(os.path.join(D, "koicha"), exist_ok=True)
-    name = f"bvmap-koicha-{area}"
+    name = f"bvmap-koicha-{area}" + ("-roads" if a.roads else "")
     path = os.path.join(D, "koicha", f"{name}.mvt.mbtiles")
     if os.path.exists(path):
         os.remove(path)

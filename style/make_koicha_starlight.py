@@ -57,6 +57,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--source-url", default=DEFAULT_URL)
     ap.add_argument("--no-patches", action="store_true", help="only shift the zoom values (D8); skip the koicha cartographic patches (D24)")
+    ap.add_argument("--roads", action="store_true", help="also apply the true-width road patch (needs tiles built with build.sh <area> roads; DECISIONS D26)")
     ap.add_argument("--minzoom", type=int, default=3, help="source minzoom (3 for the tokyo set; 4 for the hokkaido cell set)")
     ap.add_argument("-o", "--out", default=os.path.join(HERE, "bvmap-koicha-starlight.json"))
     a = ap.parse_args()
@@ -83,9 +84,10 @@ def main():
     s["metadata"] = {"derived-from": "dwg7/bvmap style/bvmap-starlight.json @ 9068c809beeecaec2a97366f8e1a6e210459eacd",
                      "zoom-shift": -1, "generator": "dwg7/bvmap-koicha style/make_koicha_starlight.py"}
     if not a.no_patches:
-        for name, fn in patches.PATCHES:
+        todo = list(patches.PATCHES) + ([("roads", patches.OPTIONAL_PATCHES["roads"])] if a.roads else [])
+        for name, fn in todo:
             s = fn(s)
-        s["metadata"]["patches"] = [n for n, _ in patches.PATCHES]
+        s["metadata"]["patches"] = [n for n, _ in todo]
     with open(a.out, "w") as f:
         json.dump(s, f, ensure_ascii=False, indent=1)
         f.write("\n")

@@ -5,7 +5,9 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 SRC=https://cyberjapandata.gsi.go.jp/xyz/optimal_bvmap-v1/optimal_bvmap-v1.pmtiles
-area=${1:?usage: build/build.sh <area in chashaku/areas.tsv>}
+area=${1:?usage: build/build.sh <area> [roads]}
+variant=${2:-}                      # "roads": keep the true-width road layers in z15 (prototype, DECISIONS D26)
+suffix=${variant:+-$variant}; xflag=${variant:+--$variant}
 cell=$(awk -F'\t' -v a="$area" '$1==a && $0 !~ /^#/ {print $2}' build/regions.tsv)
 [ -x tools/mlt-0.4.3/mlt ] || tools/fetch-mlt.sh
 if [ -n "$cell" ]; then
@@ -24,7 +26,7 @@ print('%.6f,%.6f,%.6f,%.6f'%(lon(x),lat(y+1),lon(x+1),lat(y)))")
     pmtiles extract "$SRC" "$src.tmp" --bbox="$bbox" --minzoom=4 --maxzoom=16 --download-threads=2 >/dev/null 2>&1
     mv "$src.tmp" "$src"; date -u +%FT%TZ > "data/bvmap/$area.FETCHED_AT.txt"
   fi
-  python3 -I build/build_koicha.py "$area" --cell "$cell" --source "$src"
+  python3 -I build/build_koicha.py "$area" --cell "$cell" --source "$src" $xflag
 else
 bbox=$(awk -F'\t' -v a="$area" '$1==a {print $2}' chashaku/areas.tsv)
 [ -n "$bbox" ] || { echo "unknown area: $area" >&2; exit 1; }
@@ -38,9 +40,9 @@ if [ ! -f "$low" ]; then                                     # z4-13 of this are
   pmtiles extract "$SRC" "$low" --bbox="$bbox" --minzoom=4 --maxzoom=13 --download-threads=2 >/dev/null 2>&1
   date -u +%FT%TZ > "data/bvmap/$area-z4-13.FETCHED_AT.txt"
 fi
-python3 -I build/build_koicha.py "$area"                     # -> data/koicha/bvmap-koicha-<area>.mvt.mbtiles
+python3 -I build/build_koicha.py "$area" $xflag               # -> data/koicha/bvmap-koicha-<area>[-roads].mvt.mbtiles
 fi
-rm -f "data/koicha/bvmap-koicha-$area.pmtiles"
-tools/mlt-0.4.3/mlt convert --verify "data/koicha/bvmap-koicha-$area.mvt.mbtiles" "data/koicha/bvmap-koicha-$area.pmtiles"
-pmtiles edit "data/koicha/bvmap-koicha-$area.pmtiles" --metadata="data/koicha/bvmap-koicha-$area.metadata.json"
-ls -la "data/koicha/bvmap-koicha-$area.pmtiles"
+rm -f "data/koicha/bvmap-koicha-$area$suffix.pmtiles"
+tools/mlt-0.4.3/mlt convert --verify "data/koicha/bvmap-koicha-$area$suffix.mvt.mbtiles" "data/koicha/bvmap-koicha-$area$suffix.pmtiles"
+pmtiles edit "data/koicha/bvmap-koicha-$area$suffix.pmtiles" --metadata="data/koicha/bvmap-koicha-$area$suffix.metadata.json"
+ls -la "data/koicha/bvmap-koicha-$area$suffix.pmtiles"

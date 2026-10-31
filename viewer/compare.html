@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><title>style compare (dev)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<link rel="stylesheet" href="node_modules/maplibre-gl/dist/maplibre-gl.css">
+<style>
+ html,body{margin:0;height:100%;font:13px system-ui} #wrap{display:flex;height:100%}
+ .pane{flex:1;position:relative;border-right:1px solid #888} .map{position:absolute;inset:0}
+ .tag{position:absolute;z-index:2;top:8px;left:8px;background:#fffd;padding:2px 8px;border-radius:4px}
+</style></head><body>
+<div id="wrap"><div class="pane"><div class="tag" id="ta"></div><div id="a" class="map"></div></div>
+<div class="pane"><div class="tag" id="tb"></div><div id="b" class="map"></div></div></div>
+<script src="node_modules/pmtiles/dist/pmtiles.js"></script>
+<script type="module">
+import * as maplibregl from "./node_modules/maplibre-gl/dist/maplibre-gl.mjs";
+// Dev page: two styles side by side (?a=<style url>&b=<style url>), pmtiles:// supported, #zoom/lat/lng in the URL.
+maplibregl.addProtocol("pmtiles", new pmtiles.Protocol().tile);
+const q = new URLSearchParams(location.search);
+if (!location.hash) location.hash = "#15/35.6812/139.7671";
+const m = location.hash.match(/^#(-?[\d.]+)\/(-?[\d.]+)\/(-?[\d.]+)/);
+const view = { zoom: +m[1], center: [+m[3], +m[2]] };
+const mk = (id, url) => { document.getElementById("t" + id).textContent = url.split("/").pop(); return new maplibregl.Map({ container: id, style: url, ...view, minZoom: 2, maxZoom: 19, hash: id === "b", attributionControl: { compact: true } }); };
+const A = mk("a", q.get("a")), B = mk("b", q.get("b"));
+window.__maps = { A, B };
+let lock = false;
+const follow = (f, t) => f.on("move", () => { if (lock) return; lock = true; t.jumpTo({ center: f.getCenter(), zoom: f.getZoom() }); lock = false; });
+follow(A, B); follow(B, A);
+window.__errs = []; for (const x of [A, B]) x.on("error", (e) => window.__errs.push(String(e.error && e.error.message || e.error)));
+</script></body></html>

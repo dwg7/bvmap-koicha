@@ -36,4 +36,53 @@ def contours(style):
     return style
 
 
+# --- true-width roads from z15 (DECISIONS D26) ----------------------------------------------------------------------
+# Upstream (bvmap) switches from road centre lines to road edges (RdEdg, RdCompt, RailTrCL, StrctLine) at bvmap z17 = koicha z16.
+# Here the switch moves one zoom up (z15), which needs the tiles built with `--roads`. Edge lines are 2-3 px wide at z16+ in the
+# upstream style; at z15 a road is only ~1-2 px wide on the ground, so the lines get thinner with the zoom (x0.3 at z15, x0.6 at z16, x1 at z17).
+EDGE_LAYERS = ("RdEdg", "RdCompt", "RailTrCL", "StrctLine")
+CENTRE_LAYERS = ("RdCL", "RailCL")
+OLD_SWITCH, NEW_SWITCH = 16, 15
+WIDTH_FACTORS = [(15, 0.3), (16, 0.6), (17, 1.0)]
+
+
+def _scale_width(w):
+    stops = []
+    for z, f in WIDTH_FACTORS:
+        stops += [z, round(w * f, 3) if isinstance(w, (int, float)) else ["*", w, f]]
+    return ["interpolate", ["linear"], ["zoom"], *stops]
+
+
+def _move_switch(o):
+    """step on zoom with a stop at OLD_SWITCH -> NEW_SWITCH"""
+    if isinstance(o, list):
+        out = [_move_switch(x) for x in o]
+        if o and o[0] == "step" and len(o) > 2 and o[1] == ["zoom"]:
+            for i in range(3, len(o), 2):
+                if o[i] == OLD_SWITCH:
+                    out[i] = NEW_SWITCH
+        return out
+    if isinstance(o, dict):
+        return {k: _move_switch(v) for k, v in o.items()}
+    return o
+
+
+def roads(style):
+    for layer in style["layers"]:
+        sl = layer.get("source-layer")
+        if sl in EDGE_LAYERS:
+            if layer.get("minzoom") == OLD_SWITCH:
+                layer["minzoom"] = NEW_SWITCH
+            w = layer.get("paint", {}).get("line-width")
+            if w is not None:
+                layer["paint"]["line-width"] = _scale_width(w)
+        elif sl in CENTRE_LAYERS:
+            if layer.get("maxzoom") == OLD_SWITCH:
+                layer["maxzoom"] = NEW_SWITCH
+            if "filter" in layer:
+                layer["filter"] = _move_switch(layer["filter"])
+    return style
+
+
 PATCHES = [("contours", contours)]
+OPTIONAL_PATCHES = {"roads": roads}
