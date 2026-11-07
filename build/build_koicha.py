@@ -5,7 +5,7 @@ Streaming: tiles are read one koicha tile at a time from the bvmap PMTiles (dire
   koicha z<=14 : the 4 bvmap tiles of z+1 bundled (coordinates translated, extent x2)
   koicha z15   : 4 bvmap z16 tiles bundled; vt_flag17=2 features and the z17-only layers (RdEdg, RdCompt, RailTrCL, StrctLine) dropped
                  (--roads: keep those four layers in z15, so true-width roads can be drawn from z15; DECISIONS D26)
-  koicha z16   : bvmap z16 with vt_flag17=0 features dropped
+  koicha z16   : bvmap z16 with vt_flag17=0 features dropped (--roads: except centre lines of major roads)
 Only bundling and dropping; features are never edited.
 
 Usage:
@@ -35,6 +35,18 @@ IDX = []          # PMTilesIndex objects (inherited by forked workers)
 DROP2 = flag17_pred(2)
 DROP_Z15_LAYERS = Z17_ONLY_LAYERS      # --roads empties this in main() before the workers are forked
 DROP0 = flag17_pred(0)
+KEEP_MAJOR_ROADS_Z16 = False           # --roads sets this in main() before the workers are forked (DECISIONS D26)
+MAJOR_RDCTG = ("高速自動車国道等", "国道", "都道府県道")
+
+
+def keep_z16(layer, feat):
+    """vt_flag17=0 features are dropped from z16 (D3); with --roads, centre lines of major roads stay (thin hierarchy line, D26)."""
+    if DROP0(layer, feat):
+        return True
+    if KEEP_MAJOR_ROADS_Z16 and layer.name == "RdCL":
+        pr = mvt.feature_props(layer, feat)
+        return pr.get("vt_motorway") == 1 or pr.get("vt_rdctg") in MAJOR_RDCTG
+    return False
 
 
 def lookup(z, x, y):
@@ -69,7 +81,7 @@ def make(job):
     elif kind == "f15":
         L = bundle(15, x, y, lambda t: mvt.filter_layers(t, DROP_Z15_LAYERS, DROP2))
     else:
-        L = mvt.filter_layers(lookup(16, x, y), (), DROP0)
+        L = mvt.filter_layers(lookup(16, x, y), (), keep_z16)
     if not L:
         return job, None, []
     return job, gzip.compress(mvt.encode_tile(L), 9), sorted({l.name for l in L})
@@ -91,9 +103,10 @@ def main():
     ap.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) - 1))
     a = ap.parse_args()
     area = a.area
-    global DROP_Z15_LAYERS
+    global DROP_Z15_LAYERS, KEEP_MAJOR_ROADS_Z16
     if a.roads:
         DROP_Z15_LAYERS = ()
+        KEEP_MAJOR_ROADS_Z16 = True
     if a.cell:
         cz, cx, cy = map(int, a.cell.split("/"))
         bbox, minzoom = bbox_of(cz, cx, cy), cz

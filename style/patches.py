@@ -67,7 +67,30 @@ def _move_switch(o):
     return o
 
 
+# Major roads keep a thin centre line over the true-width edges, so the road hierarchy stays readable from z15
+# (the edge lines alone make a motorway look like any other street). Colour = darkness by class (the palette is silver grey).
+MAJOR_ROAD = ["any", ["==", ["get", "vt_motorway"], 1], ["in", ["get", "vt_rdctg"], ["literal", ["高速自動車国道等", "国道", "都道府県道"]]]]
+MAJOR_COLOR = ["case", ["any", ["==", ["get", "vt_motorway"], 1], ["==", ["get", "vt_rdctg"], "高速自動車国道等"]], "rgba(108,109,114,1)",
+               ["==", ["get", "vt_rdctg"], "国道"], "rgba(134,135,140,1)", "rgba(166,167,171,1)"]
+_IS_MOTORWAY = ["any", ["==", ["get", "vt_motorway"], 1], ["==", ["get", "vt_rdctg"], "高速自動車国道等"]]
+# one zoom interpolation at the top; the data-driven choice sits inside the stop values
+MAJOR_WIDTH = ["interpolate", ["linear"], ["zoom"],
+               15, ["case", _IS_MOTORWAY, 1.2, 0.8],
+               17, ["case", _IS_MOTORWAY, 2.4, 1.6]]
+
+
+def _major_centre_layer():
+    return {
+        "id": "bvmap-道路中心線(主要道路・細線)", "type": "line", "source": "bvmap", "source-layer": "RdCL", "minzoom": NEW_SWITCH,
+        "filter": MAJOR_ROAD,
+        "layout": {"line-join": "round", "line-cap": "butt", "line-sort-key": ["get", "vt_drworder"]},
+        "paint": {"line-color": MAJOR_COLOR, "line-width": MAJOR_WIDTH,
+                  "line-opacity": ["interpolate", ["linear"], ["zoom"], 17, 1, 18.5, 0]},
+    }
+
+
 def roads(style):
+    layers_out = []
     for layer in style["layers"]:
         sl = layer.get("source-layer")
         if sl in EDGE_LAYERS:
@@ -81,6 +104,10 @@ def roads(style):
                 layer["maxzoom"] = NEW_SWITCH
             if "filter" in layer:
                 layer["filter"] = _move_switch(layer["filter"])
+        layers_out.append(layer)
+        if layer.get("id") == "bvmap-道路縁":      # the thin major-road centre line goes right above the road edges
+            layers_out.append(_major_centre_layer())
+    style["layers"] = layers_out
     return style
 
 
