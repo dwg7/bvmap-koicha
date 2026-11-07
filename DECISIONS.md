@@ -842,3 +842,35 @@ bvmap では z17 の内容(koicha では z16)で、`hyp` の z15 では、設計
 
 - hfu さんの見た目の判断(階層感をどうするか、線の細さの数値)。承認されたら、階層感の対応と、北海道版への展開を進める。
 
+---
+
+## D27: 東京の試作タイル(真幅道路 + 主要道路の細線)を stars に新規配置し、テストページで見られるようにした
+
+**Status**: Accepted (2026-11-07) — hfu さんの指示(「主要道路の中心線を細い色線で残す案を進めてよい。試作のタイルを stars に新規ファイルとして置き、テストページの ?right= で見られるように」)
+
+### D26 の課題への対応(主要道路の階層感)
+
+- `style/patches.py` の `roads` に、**主要道路の細い中心線**のレイヤー `bvmap-道路中心線(主要道路・細線)` を追加(真幅の道路縁 `bvmap-道路縁` の直上)。
+  対象は `vt_rdctg` が高速自動車国道等・国道・都道府県道、または `vt_motorway == 1`。濃さは階層順(高速 `rgba(108,109,114)`、国道 `134`、県道 `166`)、
+  太さは z15 で 0.8〜1.2px → z17 で 1.6〜2.4px、z17 から z18.5 にかけてフェードアウト。`vt_drworder` で重なり順を保つ。
+  (検証器は、1 つの式でのズームの補間を 2 回使うことを許さないので、補間を最上位 1 つにして、値側で条件分岐している。)
+- **z16 のタイルにも、主要道路の中心線を残す**(`build_koicha.py --roads`)。D3 では `vt_flag17=0` を z16 から捨てていたため、z16 では細線が出なかった(z15 で 206 本、z16 で 0 本)。
+  残したのは、主要道路の `RdCL` だけ。東京の z16 のタイルは、中央値 12.0 → 12.8KB(+7%)、最大 26.9 → 27.4KB。z15 は、中央値 38.0 → 50.4KB、最大 74.8 → 85.0KB(D26 と同じ)。
+- 確認(手元の `viewer/compare.html`): 東京駅・築地・銀座で、z15 は 206 本、z16 は 128 本、z17 は 32 本の細線が描画され、大通りに沿った控えめな階層感が出る。ブラウザのエラーなし。
+
+### 本番への変更(この 1 点のみ。Martin の再起動・設定変更なし)
+
+- `/home/stars/data/bvmap-koicha-tokyo-roads.pmtiles`(6,374,063 B、z3〜16、267 タイル)を新規追加。仮名 `.partial` で転送 → リモートで sha256 を照合
+  (`e3b7720c817c5be4512a0023a4d85468197d0cbd98d83e6afd9642eb9bf88f59`、一致)→ 同名ファイルがないことを確認して `mv`。事前の空きは 1.3T。
+- 確認(`?cb=`): `/catalog` に `bvmap-koicha-tokyo-roads`(`application/vnd.maplibre-tile`)が、再起動なしで出た。TileJSON は z3〜16、24 層。
+  タイル 15/29107/12900(87,008 B)、16/58205/25801(28,011 B)が 200。
+- **テストページで見られる**: https://dwg7.unopengis.org/bvmap-koicha/?left=https://stars.optgeo.org/style/bvmap-koicha-starlight&right=styles/bvmap-koicha-starlight-roads.json#15/35.6812/139.7671
+  (左: 公開中のスタイル、右: 試作。`docs/styles/bvmap-koicha-starlight-roads.json` のソースは `https://stars.optgeo.org/bvmap-koicha-tokyo-roads`)。ページの冒頭にも、このリンクを足した。
+  右の公開スタイル(`bvmap-koicha-starlight`)は、まだ変わっていない。
+
+### 次(hfu さんの指示に含まれる、北海道版)
+
+- 北海道版を `build.sh hokkaido roads` で作り直す(バックグラウンドで実行中。z15 が約 +33% で、3.22GB → 約 3.5GB の見積もり)。
+- 既存の `bvmap-koicha-hokkaido.pmtiles` の入れ替えと、公開スタイルの切り替え(タイルが先、スタイルが後。新しいタイルは z15 の上位集合なので、古いスタイルのままでも壊れない)は、
+  手順を示して確認してから行う。
+
