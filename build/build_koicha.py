@@ -28,6 +28,8 @@ sys.path.insert(0, os.path.join(ROOT, "chashaku", "lib"))
 sys.path.insert(0, os.path.join(ROOT, "chashaku"))
 import mvt
 import pmtiles_reader as pr
+sys.path.insert(0, os.path.join(ROOT, "build"))
+import seams
 from measure import Z17_ONLY_LAYERS, flag17_pred
 
 D = os.path.join(ROOT, "data")
@@ -35,6 +37,7 @@ IDX = []          # PMTilesIndex objects (inherited by forked workers)
 DROP2 = flag17_pred(2)
 DROP_Z15_LAYERS = Z17_ONLY_LAYERS      # --roads empties this in main() before the workers are forked
 DROP0 = flag17_pred(0)
+SEAMS = False                          # --seams: bundle without the tile-buffer seams (DECISIONS D31)
 KEEP_MAJOR_ROADS_Z16 = False           # --roads sets this in main() before the workers are forked (DECISIONS D26)
 MAJOR_RDCTG = ("高速自動車国道等", "国道", "都道府県道")
 
@@ -67,11 +70,13 @@ def bundle(z, x, y, prep=None):
             ext = {l.extent for l in t}
             assert len(ext) == 1, ext
             e = ext.pop()
-            kids.append((prep(t) if prep else t, dx * e, dy * e, e))
+            kids.append((prep(t) if prep else t, dx, dy, e))
     if not kids:
         return None
     assert len({k[3] for k in kids}) == 1
-    return mvt.merge_children([k[:3] for k in kids], 2 * kids[0][3])
+    if SEAMS:
+        return seams.merge_seamless(kids, 2 * kids[0][3])
+    return mvt.merge_children([(k[0], k[1] * k[3], k[2] * k[3]) for k in kids], 2 * kids[0][3])
 
 
 def make(job):
@@ -100,10 +105,12 @@ def main():
     ap.add_argument("--cell")
     ap.add_argument("--source", action="append")
     ap.add_argument("--roads", action="store_true", help="keep the z17-only road layers (RdEdg, RdCompt, ...) in z15; output name gets a -roads suffix")
+    ap.add_argument("--seams", action="store_true", help="remove the tile-buffer seams when bundling (build/seams.py); output name gets a -seams suffix")
     ap.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) - 1))
     a = ap.parse_args()
     area = a.area
-    global DROP_Z15_LAYERS, KEEP_MAJOR_ROADS_Z16
+    global DROP_Z15_LAYERS, KEEP_MAJOR_ROADS_Z16, SEAMS
+    SEAMS = a.seams
     if a.roads:
         DROP_Z15_LAYERS = ()
         KEEP_MAJOR_ROADS_Z16 = True
@@ -138,7 +145,7 @@ def main():
     print(f"koicha tiles to build: {len(jobs):,}", flush=True)
 
     os.makedirs(os.path.join(D, "koicha"), exist_ok=True)
-    name = f"bvmap-koicha-{area}" + ("-roads" if a.roads else "")
+    name = f"bvmap-koicha-{area}" + ("-roads" if a.roads else "") + ("-seams" if a.seams else "")
     path = os.path.join(D, "koicha", f"{name}.mvt.mbtiles")
     if os.path.exists(path):
         os.remove(path)

@@ -6,8 +6,9 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 SRC=https://cyberjapandata.gsi.go.jp/xyz/optimal_bvmap-v1/optimal_bvmap-v1.pmtiles
 area=${1:?usage: build/build.sh <area> [roads]}
-variant=${2:-}                      # "roads": keep the true-width road layers in z15 (prototype, DECISIONS D26)
-suffix=${variant:+-$variant}; xflag=${variant:+--$variant}
+variant=${2:-}                      # "roads": true-width road layers in z15 (D26); "seams": no tile-buffer seams (D31); "roads-seams": both
+suffix=${variant:+-$variant}; xflag=""
+for v in ${variant//-/ }; do xflag="$xflag --$v"; done
 cell=$(awk -F'\t' -v a="$area" '$1==a && $0 !~ /^#/ {print $2}' build/regions.tsv)
 [ -x tools/mlt-0.4.3/mlt ] || tools/fetch-mlt.sh
 if [ -n "$cell" ]; then

@@ -50,7 +50,7 @@ dwg7/evergreen の言葉では、これは Cartographer ではなく Library 側
 - `chashaku/areas.tsv` — 測る場所(名前、経度緯度の範囲)
 - `chashaku/results/` — CSV と Markdown の集計。`data/`(抽出、変種タイル、MLT 出力)は git の管理外で、再生成できる
 - `tools/` — `mlt` の取得・検証(バイナリはコミットしない)
-- `build/` — 範囲限定の bvmap-koicha PMTiles のビルド(`build.sh`、`build_koicha.py` は逐次処理、`regions.tsv` は空間 ID の領域、`stats_pmtiles.py`)
+- `build/` — 範囲限定の bvmap-koicha PMTiles のビルド(`build.sh`、`build_koicha.py` は逐次処理、`regions.tsv` は空間 ID の領域、`stats_pmtiles.py`、継ぎ目を消す貼り合わせ `seams.py` と検証 `check_seams.py`(D31))
 - `style/` — bvmap-koicha-starlight(`make_koicha_starlight.py` の生成物。手で編集しない)と、上流のスナップショット `upstream/`
 - `viewer/` — 開発用の描画確認(`index.html`: 素のスタイル、`starlight.html`: starlight、ローカルのみ)
 - `docs/` — GitHub Pages のテストページ(`index.html`)と、同梱の MapLibre(`vendor/`)、`bvmap-anatomy.md`

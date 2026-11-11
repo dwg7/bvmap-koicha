@@ -24,3 +24,16 @@ python3 build/stats_pmtiles.py data/koicha/bvmap-koicha-hokkaido.pmtiles
 ```
 Needs ~12GB free (extract 2.5GB + mbtiles 3.9GB + PMTiles 3.2GB). A cell is nested with all lower cells, so every koicha tile at zoom >= the cell zoom is complete.
 
+
+## Seamless bundling (`--seams`, DECISIONS D31)
+
+bvmap tiles carry an 80-unit buffer, so near a tile edge a feature is cut at the buffer edge and the neighbour holds an overlapping
+copy. In the original tile the cut is outside the visible square; when 4 tiles are bundled it lands in the middle and shows as a
+line across buildings, and lines in the overlap band are drawn twice. `build/seams.py` fixes this while bundling: each child keeps
+only its own side of the seam, polygon pieces that abut along the seam are dissolved (the seam edges cancel), line pieces are joined,
+points on the other side are dropped. Attributes are never changed; features inside their own square are passed through untouched.
+
+```bash
+build/build.sh tokyo roads-seams        # variant tokens: roads, seams -> bvmap-koicha-tokyo-roads-seams.pmtiles
+python3 -I build/check_seams.py data/bvmap/tokyo.pmtiles --z 15 --n 200   # area / length / attributes, old vs new, on complete bundles
+```
