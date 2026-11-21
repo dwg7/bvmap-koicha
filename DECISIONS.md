@@ -1082,3 +1082,18 @@ hfu さんの指摘: 貼り合わせた建物(面)の継ぎ目に線が出る。
 - 代替(検証済み): 全セルを同じ mbtiles に `--name <同じ名前> --resume` で積み上げ、最後に `--meta-bounds`(全国)と `--meta-minzoom 3` を付けて、1 回だけ `mlt convert --verify`。
   東京(bbox)+ 札幌(セル `4/14/5`)で試し、457 タイル、`bounds` 122,17,154.77,46、`minzoom` 3、`tile compression: none`、MLT の検証が通った。
 - 追加: `--meta-bounds`、`--meta-minzoom`。計画書の第 3・5 節を更新した(ピーク約 62GB、余裕を含めて約 80GB)。
+
+## D36: stars の北海道版を `roads-seams`(継ぎ目なし)に入れ替えた(再起動なし)(2026-11-21)
+
+**Status**: Accepted — hfu さんの承認(チャット、2026-11-21)。stars セッションにも、hfu さんが直接確認し、事前連絡と所見(D29 と同じ注意)を受けた。Cloudflare Access の認証は hfu さん。
+
+- 入れ替えたもの: `/home/stars/data/bvmap-koicha-hokkaido.pmtiles`(旧 3,305,776,770 B、`827110b0…d7c9`)→ 新 3,153,480,332 B、sha256 `3749a33329b7734bf9e6abb0b4bad09b0c9ed019e0ab9ae47fcd085273579c35`(D33 のビルド)。**東京は触っていない**(従来の真幅道路版のまま)。
+- 手順(D29 と同じ): `.new` で転送 → リモートで sha256 照合(一致)→ 現行が D29 の版と一致することを確認 → `cp -p` で `.bak.20261121_204314`(`cmp` で同一)→ `chmod 644` → `mv`。Martin は再起動していない。
+- 公開側の確認(`?cb=`): TileJSON(zoom 4〜16、24 層)、複合 `hokkaido,tokyo`(z3〜16、48 層)、タイル 6 枚(継ぎ目の領域を含む)は、サイズと sha256 が手元の新ファイルと一致。元の bvmap・公開スタイルも 200。
+- 転送の実測(全国版の見積もりに使う): ホーム回線の Mac から Cloudflare 経由の ssh/rsync で、3.15GB のうち最初の約 1.77GB に長時間かかった。速度は 0.03〜3.8MB/s と大きく揺れ、一度ハングした。
+  ハングは、ssh の keepalive(`ServerAliveInterval=15`)付きの再試行ループ + `rsync --inplace --partial`(途中ファイルを再利用)で解消。
+  残りの約 1.39GB は、バンコクの空港の WiFi から、`rsync -z` で 12 分 22 秒(約 1.9MB/s)。MLT の圧縮率は、gzip -6 で 82〜88% にとどまり、効果は小さい。
+  → 約 21GB は、この回線から Cloudflare 経由では現実的でない(約 3 時間〜)。`slate` が stars と同じ LAN にあるか、物理的に運べることが、実行環境の条件。
+- 小さな不具合: TileJSON の `name` が `bvmap-koicha-hokkaido-roads-seams`(ビルドの名前が、そのままメタデータに入った)。配信は、ファイル名がソース名なので影響なし。
+  次のビルドで、`pmtiles edit` の JSON の `name` を、配信名に合わせる(`build.sh` の改善項目)。
+- 残っている後始末: stars の `.bak.20261121_204314`(3.3GB)を、stars の検証後に削除する。ローカルの `data/koicha/deploy/`(旧版の写し)も、そのあとに削除する。
