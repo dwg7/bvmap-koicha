@@ -27,14 +27,13 @@ E = 4096
 
 def flag17_pred(drop_value):
     """keep(layer, feat): drop features whose vt_flag17 == drop_value (features without the key are kept)."""
-    cache = {}
+    last = [None, -1]       # one slot only: remember the previous layer object (keeping every layer alive leaked ~170KB per tile)
 
     def keep(layer, feat):
-        hit = cache.get(id(layer))
-        if hit is None or hit[0] is not layer:   # keep a reference: id() is reused after GC
-            fk = layer.keys.index("vt_flag17") if "vt_flag17" in layer.keys else -1
-            cache[id(layer)] = hit = (layer, fk)
-        fk = hit[1]
+        if last[0] is not layer:
+            last[0] = layer
+            last[1] = layer.keys.index("vt_flag17") if "vt_flag17" in layer.keys else -1
+        fk = last[1]
         if fk < 0:
             return True
         t = feat.tags
