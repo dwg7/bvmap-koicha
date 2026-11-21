@@ -109,6 +109,8 @@ def main():
     ap.add_argument("--resume", action="store_true", help="keep an existing mbtiles and build only the tiles that are not in it yet (safe to stop and restart)")
     ap.add_argument("--maxzoom", type=int, default=16, help="build only zooms <= this (e.g. 3 for a small overview file)")
     ap.add_argument("--minzoom", type=int, help="override the first zoom (bbox mode default 3; --cell mode: the cell zoom)")
+    ap.add_argument("--meta-bounds", help="metadata bounds lon0,lat0,lon1,lat1 (default: the area/cell box); use the national box when cells are accumulated into one mbtiles")
+    ap.add_argument("--meta-minzoom", type=int, help="metadata minzoom (default: the first built zoom)")
     ap.add_argument("--name", help="output name (default bvmap-koicha-<area>[-roads][-seams])")
     ap.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) - 1))
     a = ap.parse_args()
@@ -185,6 +187,10 @@ def main():
     orig = pr.read_metadata(sources[-1])
     desc = f"bvmap-koicha regional tile set (hyp arrangement), {where}. Not an official GSI product."
     attribution = "国土地理院最適化ベクトルタイルを加工して作成"
+    if a.meta_bounds:
+        bbox = [float(v) for v in a.meta_bounds.split(",")]
+    if a.meta_minzoom is not None:
+        minzoom = a.meta_minzoom
     vl = [dict(l, minzoom=max(l.get("minzoom", 4) - 1, minzoom), maxzoom=a.maxzoom) for l in orig["vector_layers"]]
     meta = {"name": name, "format": "pbf", "type": "overlay", "version": "1", "minzoom": str(minzoom), "maxzoom": str(a.maxzoom),
             "bounds": ",".join(f"{v:.6f}" for v in bbox), "center": f"{(bbox[0]+bbox[2])/2:.6f},{(bbox[1]+bbox[3])/2:.6f},{minzoom + 3}",

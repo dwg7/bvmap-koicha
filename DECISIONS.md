@@ -1075,3 +1075,10 @@ hfu さんの指摘: 貼り合わせた建物(面)の継ぎ目に線が出る。
     検証: 東京で、z16・z15 の半分・z≤5 を消した状態から再開して、267 タイルが、一括ビルドと内容まで一致した(違うのは `name` だけ)。
   - `--maxzoom`・`--minzoom`・`--name`: z3 だけの小さなファイル(bvmap の z4 を束ねる概観)を作れる。東京のデータで、`--maxzoom 3` が z3 の 1 タイルを作ることを確認した。
 - まだ実装していないもの: 結合後の検証スクリプト(`pmtiles merge` の出力が、セルのファイルと、タイルのバイト単位で一致することの確認)。
+
+### D35 追記(2026-11-21): `pmtiles merge` は使えない → セルを同じ mbtiles に積み上げる
+
+- `pmtiles merge`(go-pmtiles 1.28.0)は、help に出るが、入力が何本でも `panic: merge <output> <input>` で終わる(未実装)。計画書の「結合」を、これに頼れない。
+- 代替(検証済み): 全セルを同じ mbtiles に `--name <同じ名前> --resume` で積み上げ、最後に `--meta-bounds`(全国)と `--meta-minzoom 3` を付けて、1 回だけ `mlt convert --verify`。
+  東京(bbox)+ 札幌(セル `4/14/5`)で試し、457 タイル、`bounds` 122,17,154.77,46、`minzoom` 3、`tile compression: none`、MLT の検証が通った。
+- 追加: `--meta-bounds`、`--meta-minzoom`。計画書の第 3・5 節を更新した(ピーク約 62GB、余裕を含めて約 80GB)。
