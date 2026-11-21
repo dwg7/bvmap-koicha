@@ -9,6 +9,7 @@ area=${1:?usage: build/build.sh <area> [roads]}
 variant=${2:-}                      # "roads": true-width road layers in z15 (D26); "seams": no tile-buffer seams (D31); "roads-seams": both
 suffix=${variant:+-$variant}; xflag=""
 for v in ${variant//-/ }; do xflag="$xflag --$v"; done
+[ -n "${RESUME:-}" ] && xflag="$xflag --resume"     # RESUME=1 build/build.sh ... : keep the mbtiles, build only the missing tiles
 cell=$(awk -F'\t' -v a="$area" '$1==a && $0 !~ /^#/ {print $2}' build/regions.tsv)
 [ -x tools/mlt-0.4.3/mlt ] || tools/fetch-mlt.sh
 if [ -n "$cell" ]; then

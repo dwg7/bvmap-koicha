@@ -106,6 +106,10 @@ def main():
     ap.add_argument("--source", action="append")
     ap.add_argument("--roads", action="store_true", help="keep the z17-only road layers (RdEdg, RdCompt, ...) in z15; output name gets a -roads suffix")
     ap.add_argument("--seams", action="store_true", help="remove the tile-buffer seams when bundling (build/seams.py); output name gets a -seams suffix")
+    ap.add_argument("--resume", action="store_true", help="keep an existing mbtiles and build only the tiles that are not in it yet (safe to stop and restart)")
+    ap.add_argument("--maxzoom", type=int, default=16, help="build only zooms <= this (e.g. 3 for a small overview file)")
+    ap.add_argument("--minzoom", type=int, help="override the first zoom (bbox mode default 3; --cell mode: the cell zoom)")
+    ap.add_argument("--name", help="output name (default bvmap-koicha-<area>[-roads][-seams])")
     ap.add_argument("--workers", type=int, default=max(1, (os.cpu_count() or 2) - 1))
     a = ap.parse_args()
     area = a.area
@@ -124,6 +128,8 @@ def main():
         bbox, minzoom = [float(v) for v in tsv[area].split(",")], 3
         sources = a.source or [os.path.join(D, "bvmap", f"{area}-z4-13.pmtiles"), os.path.join(D, "bvmap", f"{area}.pmtiles")]
         where = "bbox " + tsv[area]
+    if a.minzoom is not None:
+        minzoom = a.minzoom
     for s in sources:
         IDX.append(pr.PMTilesIndex(s))
     keys = set()
@@ -138,21 +144,32 @@ def main():
             ix.index = {k: v for k, v in ix.index.items() if k in keys}
     print(f"bvmap tiles: {len(keys):,}; zooms {min(k[0] for k in keys)}-{max(k[0] for k in keys)}; {where}", flush=True)
     jobs = []
-    for z in range(minzoom, 15):
+    for z in range(minzoom, min(15, a.maxzoom + 1)):
         jobs += [("b", z, x, y) for (x, y) in sorted({(k[1] // 2, k[2] // 2) for k in keys if k[0] == z + 1})]
-    jobs += [("f15", 15, x, y) for (x, y) in sorted({(k[1] // 2, k[2] // 2) for k in keys if k[0] == 16})]
-    jobs += [("f16", 16, k[1], k[2]) for k in sorted(keys) if k[0] == 16]
+    if a.maxzoom >= 15:
+        jobs += [("f15", 15, x, y) for (x, y) in sorted({(k[1] // 2, k[2] // 2) for k in keys if k[0] == 16})]
+    if a.maxzoom >= 16:
+        jobs += [("f16", 16, k[1], k[2]) for k in sorted(keys) if k[0] == 16]
     print(f"koicha tiles to build: {len(jobs):,}", flush=True)
 
     os.makedirs(os.path.join(D, "koicha"), exist_ok=True)
-    name = f"bvmap-koicha-{area}" + ("-roads" if a.roads else "") + ("-seams" if a.seams else "")
+    name = a.name or (f"bvmap-koicha-{area}" + ("-roads" if a.roads else "") + ("-seams" if a.seams else ""))
     path = os.path.join(D, "koicha", f"{name}.mvt.mbtiles")
-    if os.path.exists(path):
+    layers, per_z, n = set(), {}, 0
+    if os.path.exists(path) and not a.resume:
         os.remove(path)
     db = sqlite3.connect(path)
-    db.executescript("CREATE TABLE metadata (name TEXT, value TEXT); CREATE TABLE tiles (zoom_level INTEGER, tile_column INTEGER, tile_row INTEGER, tile_data BLOB);"
-                     "CREATE UNIQUE INDEX tile_index ON tiles (zoom_level, tile_column, tile_row);")
-    layers, per_z, n = set(), {}, 0
+    db.executescript("CREATE TABLE IF NOT EXISTS metadata (name TEXT, value TEXT); CREATE TABLE IF NOT EXISTS tiles (zoom_level INTEGER, tile_column INTEGER, tile_row INTEGER, tile_data BLOB);"
+                     "CREATE UNIQUE INDEX IF NOT EXISTS tile_index ON tiles (zoom_level, tile_column, tile_row);")
+    if a.resume:
+        done = {(z, c, (1 << z) - 1 - r) for z, c, r in db.execute("SELECT zoom_level, tile_column, tile_row FROM tiles")}
+        before = len(jobs)
+        jobs = [j for j in jobs if (j[1], j[2], j[3]) not in done]
+        for z, _, _ in done:
+            per_z[z] = per_z.get(z, 0) + 1
+        n = len(done)
+        print(f"resume: {len(done):,} tiles already in {os.path.basename(path)}; {len(jobs):,} of {before:,} jobs left", flush=True)
+        db.execute("DELETE FROM metadata")
     ctx = mp.get_context("fork")
     with ctx.Pool(a.workers) as pool:
         for (kind, z, x, y), data, names in pool.imap_unordered(make, jobs, chunksize=32):
@@ -162,14 +179,14 @@ def main():
             layers.update(names)
             per_z[z] = per_z.get(z, 0) + 1
             n += 1
-            if n % 50000 == 0:
+            if n % 20000 == 0:
                 db.commit()
                 print(f"  {n:,}/{len(jobs):,}", flush=True)
     orig = pr.read_metadata(sources[-1])
     desc = f"bvmap-koicha regional tile set (hyp arrangement), {where}. Not an official GSI product."
     attribution = "国土地理院最適化ベクトルタイルを加工して作成"
-    vl = [dict(l, minzoom=max(l.get("minzoom", 4) - 1, minzoom), maxzoom=16) for l in orig["vector_layers"]]
-    meta = {"name": name, "format": "pbf", "type": "overlay", "version": "1", "minzoom": str(minzoom), "maxzoom": "16",
+    vl = [dict(l, minzoom=max(l.get("minzoom", 4) - 1, minzoom), maxzoom=a.maxzoom) for l in orig["vector_layers"]]
+    meta = {"name": name, "format": "pbf", "type": "overlay", "version": "1", "minzoom": str(minzoom), "maxzoom": str(a.maxzoom),
             "bounds": ",".join(f"{v:.6f}" for v in bbox), "center": f"{(bbox[0]+bbox[2])/2:.6f},{(bbox[1]+bbox[3])/2:.6f},{minzoom + 3}",
             "description": desc, "attribution": attribution, "json": json.dumps({"vector_layers": vl})}
     db.executemany("INSERT INTO metadata VALUES (?,?)", meta.items())

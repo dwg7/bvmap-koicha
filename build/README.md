@@ -37,3 +37,13 @@ points on the other side are dropped. Attributes are never changed; features ins
 build/build.sh tokyo roads-seams        # variant tokens: roads, seams -> bvmap-koicha-tokyo-roads-seams.pmtiles
 python3 -I build/check_seams.py data/bvmap/tokyo.pmtiles --z 15 --n 200   # area / length / attributes, old vs new, on complete bundles
 ```
+
+## Resumable and partial builds (DECISIONS D35)
+
+```bash
+RESUME=1 build/build.sh hokkaido roads-seams        # stop (kill) and run again: tiles already in the mbtiles are skipped
+python3 -I build/build_koicha.py tokyo --roads --seams --maxzoom 3 --name overview   # only z3 (a small overview file); --minzoom, --name too
+```
+`--resume` keeps the existing mbtiles and builds only the koicha tiles that are missing (the build commits every 20,000 tiles, so an interrupted
+run loses at most that much). Checked on Tokyo: after deleting z16, half of z15 and z<=5, a resumed build gives the same 267 tiles with the same
+content as an uninterrupted one. Start long builds as a detached process (`os.setsid()`; macOS has no `setsid` command) and log to `data/koicha/`.
