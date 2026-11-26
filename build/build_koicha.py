@@ -32,7 +32,7 @@ sys.path.insert(0, os.path.join(ROOT, "build"))
 import seams
 from measure import Z17_ONLY_LAYERS, flag17_pred
 
-D = os.path.join(ROOT, "data")
+D = os.environ.get("KOICHA_DATA") or os.path.join(ROOT, "data")   # KOICHA_DATA=/Volumes/... puts the outputs (data/koicha) on another disk
 IDX = []          # PMTilesIndex objects (inherited by forked workers)
 DROP2 = flag17_pred(2)
 DROP_Z15_LAYERS = Z17_ONLY_LAYERS      # --roads empties this in main() before the workers are forked
@@ -109,6 +109,7 @@ def main():
     ap.add_argument("--resume", action="store_true", help="keep an existing mbtiles and build only the tiles that are not in it yet (safe to stop and restart)")
     ap.add_argument("--maxzoom", type=int, default=16, help="build only zooms <= this (e.g. 3 for a small overview file)")
     ap.add_argument("--minzoom", type=int, help="override the first zoom (bbox mode default 3; --cell mode: the cell zoom)")
+    ap.add_argument("--bbox", help="lon0,lat0,lon1,lat1 instead of chashaku/areas.tsv (bbox mode; needs --source)")
     ap.add_argument("--meta-bounds", help="metadata bounds lon0,lat0,lon1,lat1 (default: the area/cell box); use the national box when cells are accumulated into one mbtiles")
     ap.add_argument("--meta-minzoom", type=int, help="metadata minzoom (default: the first built zoom)")
     ap.add_argument("--name", help="output name (default bvmap-koicha-<area>[-roads][-seams])")
@@ -125,6 +126,11 @@ def main():
         bbox, minzoom = bbox_of(cz, cx, cy), cz
         sources = a.source or [os.path.join(D, "bvmap", f"{area}.pmtiles")]
         where = f"spatial-ID cell {a.cell}"
+    elif a.bbox:
+        bbox, minzoom = [float(v) for v in a.bbox.split(",")], 3
+        sources = a.source
+        assert sources, "--bbox needs --source"
+        where = "bbox " + a.bbox
     else:
         tsv = dict(l.split("\t") for l in open(os.path.join(ROOT, "chashaku", "areas.tsv")).read().split("\n") if l)
         bbox, minzoom = [float(v) for v in tsv[area].split(",")], 3
