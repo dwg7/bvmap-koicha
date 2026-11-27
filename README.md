@@ -4,7 +4,7 @@
 > This is an activity of dwg7 (UN Smart Maps Group). It is not an official product or service of the Geospatial Information Authority of Japan (GSI).
 
 国土地理院の最適化ベクトルタイル(bvmap)を素材にして、**建築物がたっぷり入った、濃い地図**のためのタイルセット(PMTiles)を作るプロジェクトです。
-計測(chashaku)を終え、東京の範囲限定版を stars で公開しています(スタイル `https://stars.optgeo.org/style/bvmap-koicha-starlight`、タイル `https://stars.optgeo.org/bvmap-koicha-tokyo` と `https://stars.optgeo.org/bvmap-koicha-hokkaido`。D15/D21)。スタイルは北海道と東京の複合ソースで公開済みです(D22)。全国版はこれからです。
+日本全国版を stars で公開しています(スタイル `https://stars.optgeo.org/style/bvmap-koicha-starlight`、タイル `https://stars.optgeo.org/bvmap-koicha`、約 21.8GB・約 290 万枚。国土地理院最適化ベクトルタイルの 2026-11-26 版から作成。DECISIONS D37〜D40)。北海道版・東京版(`bvmap-koicha-hokkaido`・`-tokyo`)は、移行期間(3 週間)のあと削除します。
 
 *koicha — thick tea. The same matcha as usucha (thin tea), made with less water.*
 *bvmap-koicha takes the same GSI data as bvmap and brews it thicker: more buildings per tile, the same ingredients.*
@@ -38,7 +38,7 @@ bvmap の z+1(一段近い所)の内容を、z(一段遠い所)で見せます�
 - MLT は、同じ内容を MVT より小さく符号化します(測定では、都市部で 15〜27% 小さい)。
 - 一段高く飛ぶと、1 枚のタイルが覆う面積が 4 倍になるので、中身は約 4 倍になります。MLT で小さくなっても、同じ表示ズームのタイルは、bvmap の 2.7〜3.7 倍に大きくなります(都市の z13・z15)。
 - それでも、タイルの大きさの上限を**目安 256KB、最悪でも 512KB** と決めて(DECISIONS D19)、その中に収まることを、実際のデータで確かめました。
-  北海道全体(約 77 万枚)で、最大のタイルは 202KB(日高山地の z13、等高線が 98%)です。
+  日本全国(約 290 万枚)で、最大のタイルは 320KB(北アルプスの z13、等高線)で、256KB を超えるのはこの 1 枚だけです(D39)。
 - つまり、「MLT による縮小」と「上限の引き上げ」の両方で、同じタイルの重さの感覚のまま、一段高い所から濃い地図を見せられます。
 
 *English: bvmap kept buildings out of coarser zooms because vector tiles had to stay small ("flying low"). bvmap-koicha shows bvmap's z+1 content at z ("flying one level higher"): MLT encodes the same data 15–27% smaller in cities (measured), and the tile-size budget is set to 256 KB (512 KB at worst). Hokkaido's largest tile is 202 KB.*
@@ -68,7 +68,7 @@ bvmap の z+1(一段近い所)の内容を、z(一段遠い所)で見せます�
 | [CLAUDE.md](CLAUDE.md) | 作業規則(人とエージェント向け) |
 | [style/bvmap-koicha-starlight.md](style/bvmap-koicha-starlight.md) | bvmap-starlight のズーム値を一段ずらしたスタイル |
 | `chashaku/` | 計測のコード(Python 標準ライブラリのみ)と `results/`(CSV) |
-| `build/` | 範囲限定の PMTiles のビルド(tokyo は bbox、hokkaido は空間 ID `4/14/5`) |
+| `build/` | PMTiles のビルド(空間 ID のセルごとに作って 1 本に積み上げる全国版、継ぎ目を消す貼り合わせ。計画と手順は `build/NATIONAL-PLAN.md`) |
 | `viewer/` | 描画確認用の MapLibre GL JS ページ(npm パッケージは `node_modules`、git の管理外) |
 | `tools/` | 取得・検証用スクリプト(バイナリはコミットしない) |
 
