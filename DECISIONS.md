@@ -1135,3 +1135,18 @@ hfu さんの指摘: 貼り合わせた建物(面)の継ぎ目に線が出る。
   6. ローカルの Martin での配信: 未実施(Range 付きの静的配信では、MapLibre で描画できた)。
 - 次: stars への配置(約 21.8GB の転送。Cloudflare 経由では、良い回線で約 3 時間、ホーム回線では不安定。hfu さんと方法を相談)→ スタイルのソースを `bvmap-koicha` に切り替える hfu/stars の PR
   → 移行期間 3 週間(D34)→ 北海道・東京の削除。テストページ・README も更新する。
+
+## D40: 全国版を stars に配置し(LAN)、公開スタイルの切り替え PR を出した(2026-11-27)
+
+**Status**: 配置は完了。切り替えは PR(hfu/stars#19)で、stars の gatekeeper が hfu さんに直接確認してからマージする。
+
+- hfu さんの指示(チャット):「stars には LAN から送ってみよう。切り替えまで進めよう」、転送の開始は 23 時以降。stars セッションは hfu さんに直接確認し、システム更新(53 パッケージ、cloudflared、Martin 再起動)の完了後に Go サインを出した。
+- 転送(LAN、`stars.local`): 最初の 0.98GB を rsync(約 25〜28MB/s)。stars の更新待ちで中断し、23:03 に再開したところ、`rsync --inplace` が照合の後で止まった(6 分間、リモートが増えない)。
+  途中ファイルが先頭部分であることを利用して、残り 20.78GB を `tail -c +N | ssh 'cat >>'` の単一ストリームで追記(19 分 58 秒、約 17.3MB/s)。全体の sha256 をリモートで照合して一致(2 分 30 秒)。
+- 配置: `/home/stars/data/bvmap-koicha.pmtiles`(新規。`chmod 644` → `mv`、2026-11-27T14:32:32Z)。Martin の再起動・config の変更なし。fs-watch が自動登録し、20 秒後に TileJSON が 200
+  (z3〜16、24 層、bounds 122,17,154.77,46)。`/catalog` は 51 件。hokkaido・tokyo は無変更。
+- 確認(公開側、`?cb=`): 8 枚(札幌・東京駅・大阪梅田・福岡天神・那覇・最大タイル 13/7228/3208・沖ノ鳥島 7/112/56・z3 の 3/7/3)が、手元の全国版とバイト単位で一致。既存の北海道・東京、公開スタイル、元の bvmap も 200。
+- 切り替え: hfu/stars#19。`styles/bvmap-koicha-starlight.json` の `sources.bvmap.url` だけを `https://stars.optgeo.org/bvmap-koicha` にする(差分 1 行、検証 0 エラー)。
+  このリポジトリの `make_koicha_starlight.py` の既定のソースと、`style/bvmap-koicha-starlight.json` も、全国版(真幅道路入り)にそろえた。
+- 未了: stars セッションが止まっていて、完了の連絡が届かなかった(起動後に送る)。マージ後に、テストページの範囲判定・ボタンと README を全国版に合わせる。
+  移行期間 3 週間(D34)のあと、北海道・東京の削除を hfu さんに確認する。外付けの積み上げ mbtiles(24.7GB)は、切り替えが落ち着いたら消す。
