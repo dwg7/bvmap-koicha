@@ -235,6 +235,31 @@ def shift_geom(geom, dx, dy):
     return g
 
 
+def scale_geom(geom, k):
+    """Multiply every coordinate by the integer k (lossless): only the parameter integers change, commands stay."""
+    out, i, n = [], 0, len(geom)
+    while i < n:
+        c = geom[i]
+        out.append(c)
+        i += 1
+        cmd, cnt = c & 7, c >> 3
+        if cmd in (1, 2):
+            for _ in range(2 * cnt):
+                out.append(zigzag(unzigzag(geom[i]) * k))
+                i += 1
+    return out
+
+
+def scale_layers(layers, k):
+    """Layers with extent * k and coordinates * k (used when bundled children have different extents)."""
+    out = []
+    for l in layers:
+        n = Layer(l.name, l.extent * k, l.version, l.keys, l.values)
+        n.features = [Feature(f.id, f.tags, f.type, scale_geom(f.geom, k)) for f in l.features]
+        out.append(n)
+    return out
+
+
 # ---- bundling / filtering ---------------------------------------------------
 
 def merge_children(children, extent):

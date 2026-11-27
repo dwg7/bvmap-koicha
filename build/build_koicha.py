@@ -73,6 +73,12 @@ def bundle(z, x, y, prep=None):
             kids.append((prep(t) if prep else t, dx, dy, e))
     if not kids:
         return None
+    emax = max(k[3] for k in kids)
+    if any(k[3] != emax for k in kids):
+        # One bvmap tile (8/224/113, Okinotorishima) has extent 2**24 while its siblings have 4096. Scale the coarser children up by an
+        # integer factor (lossless) instead of rounding the fine one down (that would collapse the reef polygons). DECISIONS D38.
+        assert all(emax % k[3] == 0 for k in kids), [k[3] for k in kids]
+        kids = [(mvt.scale_layers(k[0], emax // k[3]) if k[3] != emax else k[0], k[1], k[2], emax) for k in kids]
     assert len({k[3] for k in kids}) == 1
     if SEAMS:
         return seams.merge_seamless(kids, 2 * kids[0][3])
