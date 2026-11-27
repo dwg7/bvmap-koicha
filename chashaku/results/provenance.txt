@@ -21,3 +21,5 @@ national (whole file, for the nationwide build; DECISIONS D37):
   sha256 2586d363093e38ed8e43be8f3360f2984fe8e4c696d0d2bc0ab47e9c09ea6d28
   NOTE: a newer version than the hokkaido/tokyo extracts (Last-Modified 2026-09-17, ETag dfa81a9c...-2015, 16,900,763,181 B)
   tiles: 2,949,893 addressed; non-empty z4 cells 4/14/6 1,287,544 / 4/13/6 881,624 / 4/14/5 779,060 / 4/14/7 1,651 / 4/13/7 14
+  output /Volumes/dorayaki/bvmap-koicha/koicha/bvmap-koicha.pmtiles: 21,758,339,372 B, sha256 847e5564a979093ba23d65900cf7cf602f89941850d61415052d492014b68ad0
+    (2,906,869 tiles z3-16, MLT tile compression none, mlt 0.4.3 convert --verify, 2026-11-27; DECISIONS D39)
