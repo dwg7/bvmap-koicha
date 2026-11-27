@@ -46,7 +46,7 @@
   <p class="sub about"><a href="https://github.com/dwg7/bvmap-koicha#readme">このプロジェクトについて(README)</a> —
     何をやろうとしているか、名前の由来(濃茶)、タイルの作り方、決めたことの記録(DECISIONS)へのリンクがあります。
     右の地図は、左と同じ表示ズームで、bvmap の一段上(z+1)の内容を見せています。</p>
-  <p class="sub about">公開中のスタイルは、等高線の階層(計曲線・主曲線)と、真幅の道路(z15 から)・主要道路の細線を含みます。
+  <p class="sub about">タイルセットは日本全国(国土地理院最適化ベクトルタイルの 2026-11-26 版から作成)。公開中のスタイルは、等高線の階層(計曲線・主曲線)と、真幅の道路(z15 から)・主要道路の細線を含みます。
     見やすい場所:
     <a href="#15/35.6812/139.7671">東京駅</a> /
     <a href="#15/43.0687/141.3540">札幌駅</a></p>
@@ -59,11 +59,16 @@
   <button data-hash="11/45.41/141.67">稚内 z11</button>
   <button data-hash="12/44.45/146.90">択捉島 z12</button>
   <button data-hash="9/43.325/145.195">釧路湿原 z9</button>
+  <button data-hash="14.5/34.7025/135.4959">大阪・梅田 z14.5</button>
+  <button data-hash="15/33.5902/130.3990">福岡・天神 z15</button>
+  <button data-hash="14/26.2124/127.6792">那覇 z14</button>
+  <button data-hash="13/36.30/137.64">北アルプス z13(最大のタイル)</button>
   <button data-hash="6/43.2/142.8">北海道全体 z6</button>
+  <button data-hash="5/36.0/137.5">日本全体 z5</button>
   <span class="sp"></span>
   <label><input type="checkbox" id="single"> bvmap-koicha だけを表示</label>
 </nav>
-<div id="warn">この位置は bvmap-koicha の範囲外です(いまのタイルセットは、北海道(空間 ID 4/14/5)と東京の一部だけ)。上の「場所」から選んでください。</div>
+<div id="warn">この位置は bvmap-koicha の範囲外です(タイルセットは日本全国。範囲は経度 122〜154.77 度、緯度 17〜46 度)。上の「場所」から選んでください。</div>
 <div id="maps">
   <div class="pane" id="left-pane"><div class="tag">bvmap-starlight(元の bvmap)</div><div id="left" class="map"></div></div>
   <div class="pane" id="right-pane"><div class="tag">bvmap-koicha-starlight(濃茶)</div><div id="right" class="map"></div></div>
@@ -92,7 +97,7 @@ const tag = (u) => u.split("/").pop().replace(/\.json$/, "");
 if (STYLE_BASE !== "https://stars.optgeo.org/style/bvmap-starlight") document.querySelector("#left-pane .tag").textContent = tag(STYLE_BASE);
 if (STYLE_KOICHA !== "https://stars.optgeo.org/style/bvmap-koicha-starlight") document.querySelector("#right-pane .tag").textContent = tag(STYLE_KOICHA);
 // Coverage of the current bvmap-koicha tile sets: [west, south, east, north]
-const COVERAGE = [[135.0, 40.979898, 157.5, 55.776573], [139.73, 35.65, 139.80, 35.71]];
+const COVERAGE = [[122, 17, 154.77, 46]];   // nationwide bvmap-koicha (DECISIONS D39/D40)
 
 if (!location.hash) location.hash = "#15/43.0687/141.3540";
 const parse = () => { const m = location.hash.match(/^#(-?[\d.]+)\/(-?[\d.]+)\/(-?[\d.]+)/); return m ? { zoom: +m[1], lat: +m[2], lng: +m[3] } : { zoom: 15, lat: 43.0687, lng: 141.354 }; };
