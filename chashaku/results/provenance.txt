@@ -14,3 +14,10 @@ hokkaido (spatial-ID cell 4/14/5, bbox 135.000000,40.979898,157.500000,55.776573
   source Last-Modified: Thu, 17 Sep 2026 07:32:00 GMT, ETag "dfa81a9cba11aad28247d63a2d8361ec-2015" (same as the tokyo extract)
   output data/koicha/bvmap-koicha-hokkaido.pmtiles sha256 a91a906a9493d47a083a2da7a1965d3d1ff021080c2e7b63485c46748249cada
 
+
+national (whole file, for the nationwide build; DECISIONS D37):
+  fetched_at (UTC): 2026-11-26T21:16:52Z .. 22:11:33Z (single stream, curl --limit-rate 5M, resumable), stored on /Volumes/dorayaki/bvmap-koicha/bvmap/
+  source Last-Modified: Thu, 26 Nov 2026 01:07:09 GMT, ETag "8f362ed1d08130b73c6936bc72d0fc76-2015", 16,900,460,966 B (checked before and after the download)
+  sha256 2586d363093e38ed8e43be8f3360f2984fe8e4c696d0d2bc0ab47e9c09ea6d28
+  NOTE: a newer version than the hokkaido/tokyo extracts (Last-Modified 2026-09-17, ETag dfa81a9c...-2015, 16,900,763,181 B)
+  tiles: 2,949,893 addressed; non-empty z4 cells 4/14/6 1,287,544 / 4/13/6 881,624 / 4/14/5 779,060 / 4/14/7 1,651 / 4/13/7 14
