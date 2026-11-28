@@ -1160,3 +1160,10 @@ hfu さんの指摘: 貼り合わせた建物(面)の継ぎ目に線が出る。
 - Cloudflare のエッジキャッシュ(最大 4 時間)が切れるまでは、`?cb=` なしでは旧スタイル(北海道・東京の複合ソース)が見えることがある。
 - 移行期間: 北海道・東京のファイルは、約 2026-12-18 まで残す。そのあとの削除は、hfu さんに確認する(stars の docs/KNOWN_FACTS.md にも記録)。
 - 後片付け(未): 外付けの積み上げ mbtiles(24.7GB)、ローカルの `data/koicha/deploy/`(D29 の旧版の写し)、stars の `bvmap-koicha-hokkaido.pmtiles.bak.20261121_204314`(D36、残っていれば)。
+
+### D41 追記(2026-11-28): 外付けの後片付け
+
+- hfu さんの了承で、積み上げに使った `bvmap-koicha.mvt.mbtiles`(24,708,075,520 B)を削除した。`/Volumes/dorayaki/bvmap-koicha` は 59GB → 36GB。
+- 残したもの: 全国版の本体 `koicha/bvmap-koicha.pmtiles`(stars と同じ、sha256 `847e5564…`)、素材 `bvmap/optimal_bvmap-v1.pmtiles`(11-26 版、sha256 `2586d363…`)、
+  実行スクリプト(取得・ビルド・変換・転送)とログ、`check-tiles.txt`(確認用 8 タイル)。
+- 外付けは、hfu さんが大きなディスク(1.8TB)に差し替えた。中身はそのまま。北海道・東京を部分的に作り直す場合は、mbtiles を作り直す(`--resume` で、セル単位に積み上げる)。
